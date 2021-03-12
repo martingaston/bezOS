@@ -1,5 +1,5 @@
 describe("a walking skeleton", () => {
   it("it a spooky skeleton", () => {
-    expect(1 + 1).toBe(2)
-  })
-})
+    expect(1 + 1).toBe(2);
+  });
+});
