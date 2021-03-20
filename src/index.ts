@@ -1,6 +1,7 @@
 import "./config"; // imports are hoisted so this needs to come first
 import { app } from "./app";
 import { getEnv } from "./util/getEnv";
+import { randomCelebrationEmoji } from "./util/randomCelebrationEmoji";
 import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
 
@@ -48,13 +49,17 @@ app.action(
 
     const questionActionUserInput = processAnswerUserInput(body, context);
 
-    if (questionActionUserInput.kind === "failure") {
+    const postEphemeral = async (message: string) =>
       await client.chat.postEphemeral({
-        channel: "",
-        text: "",
+        channel: body.channel?.id ?? "",
         user: questionActionUserInput.userId,
+        text: message,
       });
 
+    if (questionActionUserInput.kind === "failure") {
+      await postEphemeral(
+        `There was an error submitting your answer: ${questionActionUserInput.message}`
+      );
       return;
     }
 
@@ -62,16 +67,10 @@ app.action(
 
     const result = answerQuestion(questionId, userId, answer);
     result.kind === "success"
-      ? client.chat.postEphemeral({
-          channel: "",
-          text: "",
-          user: userId,
-        })
-      : client.chat.postEphemeral({
-          channel: "",
-          text: "",
-          user: userId,
-        });
+      ? postEphemeral(
+          `You answered option ${answer} to the question ${randomCelebrationEmoji()}`
+        )
+      : postEphemeral(`There was an error submitting your answer`);
   }
 );
 
