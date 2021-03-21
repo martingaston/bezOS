@@ -5,15 +5,22 @@ import { randomCelebrationEmoji } from "./util/randomCelebrationEmoji";
 import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
 import { memoryDb } from "./db/memoryDb";
+import { createQuestionBlock } from "./blocks/questionBlock";
 
 const db = memoryDb();
 
 // Listens to incoming messages that contain "hello"
-app.message("hello", async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  if (message.subtype === undefined) {
-    await say(`Hey there <@${message.user}>!`);
+app.message("hello", async ({ say }) => {
+  const question = await db.getQuestion("ab75bf4f-61a5-43c9-b1fd-486901654b2e");
+  let block;
+  if (question.kind === "success") {
+    block = createQuestionBlock(question.question, "2021-03-21T16:40:30Z");
+  } else {
+    block = "whoops - an error!";
   }
+
+  // TODO: strengthen the types here
+  say(JSON.parse(block));
 });
 
 type QuestionActionInputResult =
@@ -81,5 +88,5 @@ app.action(
   // Start your app
   await app.start(parseInt(getEnv("PORT")));
 
-  console.log("⚡️ Bolt app is running!");
+  console.log(`⚡️ Bolt app is running on port ${parseInt(getEnv("PORT"))}!`);
 })();

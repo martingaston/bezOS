@@ -17,7 +17,7 @@ export async function answerQuestion(
   answer: number
 ): Promise<QuestionResult> {
   const question = await db.getQuestion(questionId);
-  if (question !== "ok") {
+  if (question.kind === "failure") {
     return { kind: "failure" };
   }
 

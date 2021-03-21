@@ -1,5 +1,5 @@
 export type QuizDatabase = {
-  getQuestion(questionId: string): Promise<string>;
+  getQuestion(questionId: string): Promise<GetQuestionResult>;
   postAnswer(
     questionId: string,
     userId: string,
@@ -7,7 +7,19 @@ export type QuizDatabase = {
   ): Promise<string>;
 };
 
-const questions = [
+type Option = {
+  name: string;
+  text: string;
+};
+
+export type Question = {
+  id: string;
+  text: string;
+  options: Option[];
+  answer: string;
+};
+
+const questions: Question[] = [
   {
     id: "ab75bf4f-61a5-43c9-b1fd-486901654b2e",
     text:
@@ -45,15 +57,29 @@ type Answer = {
 
 const answers: Answer[] = [];
 
+type GetQuestionResult = GetQuestionFailure | GetQuestionSuccess;
+
+type GetQuestionFailure = {
+  kind: "failure";
+};
+
+type GetQuestionSuccess = {
+  kind: "success";
+  question: Question;
+};
+
 class MemoryDb implements QuizDatabase {
-  async getQuestion(questionId: string): Promise<string> {
+  async getQuestion(questionId: string): Promise<GetQuestionResult> {
     const result = questions.find((row) => row.id === questionId);
 
     if (result) {
-      return "ok";
+      return {
+        kind: "success",
+        question: result,
+      };
     }
 
-    return "error";
+    return { kind: "failure" };
   }
 
   async postAnswer(
