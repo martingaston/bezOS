@@ -4,6 +4,9 @@ import { getEnv } from "./util/getEnv";
 import { randomCelebrationEmoji } from "./util/randomCelebrationEmoji";
 import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
+import { memoryDb } from "./db/memoryDb";
+
+const db = memoryDb();
 
 // Listens to incoming messages that contain "hello"
 app.message("hello", async ({ message, say }) => {
@@ -65,7 +68,7 @@ app.action(
 
     const { questionId, userId, answer } = questionActionUserInput;
 
-    const result = answerQuestion(questionId, userId, answer);
+    const result = await answerQuestion(db, questionId, userId, answer);
     result.kind === "success"
       ? postEphemeral(
           `You answered option ${answer} to the question ${randomCelebrationEmoji()}`
