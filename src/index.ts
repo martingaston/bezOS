@@ -31,7 +31,7 @@ type QuestionActionInputSuccess = {
   kind: "success";
   questionId: string;
   userId: string;
-  answer: number;
+  answer: string;
 };
 
 type QuestionActionInputFailure = {
@@ -46,7 +46,11 @@ const processAnswerUserInput = (
 ): QuestionActionInputResult => {
   const questionId = context.actionIdMatches[1];
   const userId = body.user.id;
-  const answer = parseInt(context.actionIdMatches[2]);
+  const answer = context.actionIdMatches[2];
+
+  if (typeof questionId !== "string" || typeof answer !== "string") {
+    return { kind: "failure", userId, message: "invalid user input provided" };
+  }
 
   return { kind: "success", questionId, userId, answer };
 };

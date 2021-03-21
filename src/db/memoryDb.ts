@@ -3,7 +3,7 @@ export type QuizDatabase = {
   postAnswer(
     questionId: string,
     userId: string,
-    answer: number
+    answer: string
   ): Promise<string>;
 };
 
@@ -52,7 +52,7 @@ const questions: Question[] = [
 type Answer = {
   questionId: string;
   userId: string;
-  answer: number;
+  answer: string;
 };
 
 const answers: Answer[] = [];
@@ -85,7 +85,7 @@ class MemoryDb implements QuizDatabase {
   async postAnswer(
     questionId: string,
     userId: string,
-    answer: number
+    answer: string
   ): Promise<string> {
     const needle = answers.findIndex(
       (row) => row.questionId === questionId && row.userId === "userId"

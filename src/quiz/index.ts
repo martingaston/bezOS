@@ -14,7 +14,7 @@ export async function answerQuestion(
   db: QuizDatabase,
   questionId: string,
   userId: string,
-  answer: number
+  answer: string
 ): Promise<QuestionResult> {
   const question = await db.getQuestion(questionId);
   if (question.kind === "failure") {
