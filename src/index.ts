@@ -6,6 +6,7 @@ import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
 import { memoryDb } from "./db/memoryDb";
 import { createQuestionBlock } from "./blocks/questionBlock";
+import { Result } from "./types";
 
 const db = memoryDb();
 
@@ -23,19 +24,13 @@ app.message("hello", async ({ say }) => {
   say(JSON.parse(block));
 });
 
-type QuestionActionInputResult =
-  | QuestionActionInputSuccess
-  | QuestionActionInputFailure;
-
 type QuestionActionInputSuccess = {
-  kind: "success";
   questionId: string;
   userId: string;
   answer: string;
 };
 
 type QuestionActionInputFailure = {
-  kind: "failure";
   userId: string;
   message: string;
 };
@@ -43,7 +38,7 @@ type QuestionActionInputFailure = {
 const processAnswerUserInput = (
   body: SlackAction,
   context: Context
-): QuestionActionInputResult => {
+): Result<QuestionActionInputFailure, QuestionActionInputSuccess> => {
   const questionId = context.actionIdMatches[1];
   const userId = body.user.id;
   const answer = context.actionIdMatches[2];

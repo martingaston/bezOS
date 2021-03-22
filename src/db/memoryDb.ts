@@ -1,10 +1,27 @@
+import { Result } from "../types";
+
+type QuestionDbAction = "CREATED" | "UPDATED";
+
+type GetQuestionSuccess = {
+  question: Question;
+};
+
+type PostAnswerSuccess = {
+  action: QuestionDbAction;
+  questionId: string;
+  userId: string;
+  answer: string;
+};
+
 export type QuizDatabase = {
-  getQuestion(questionId: string): Promise<GetQuestionResult>;
+  getQuestion(
+    questionId: string
+  ): Promise<Result<Record<string, unknown>, GetQuestionSuccess>>;
   postAnswer(
     questionId: string,
     userId: string,
     answer: string
-  ): Promise<string>;
+  ): Promise<Result<Record<string, unknown>, PostAnswerSuccess>>;
 };
 
 type Option = {
@@ -57,19 +74,10 @@ type Answer = {
 
 const answers: Answer[] = [];
 
-type GetQuestionResult = GetQuestionFailure | GetQuestionSuccess;
-
-type GetQuestionFailure = {
-  kind: "failure";
-};
-
-type GetQuestionSuccess = {
-  kind: "success";
-  question: Question;
-};
-
 class MemoryDb implements QuizDatabase {
-  async getQuestion(questionId: string): Promise<GetQuestionResult> {
+  async getQuestion(
+    questionId: string
+  ): Promise<Result<Record<string, unknown>, GetQuestionSuccess>> {
     const result = questions.find((row) => row.id === questionId);
 
     if (result) {
@@ -86,17 +94,29 @@ class MemoryDb implements QuizDatabase {
     questionId: string,
     userId: string,
     answer: string
-  ): Promise<string> {
+  ): Promise<Result<Record<string, unknown>, PostAnswerSuccess>> {
     const needle = answers.findIndex(
-      (row) => row.questionId === questionId && row.userId === "userId"
+      (row) => row.questionId === questionId && row.userId === userId
     );
 
     if (needle === -1) {
       answers.push({ questionId, userId, answer });
-      return "ok";
+      return {
+        kind: "success",
+        action: "CREATED",
+        questionId,
+        userId,
+        answer,
+      };
     } else {
       answers[needle].answer = answer;
-      return "ok";
+      return {
+        kind: "success",
+        action: "UPDATED",
+        questionId,
+        userId,
+        answer,
+      };
     }
   }
 }

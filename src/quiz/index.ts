@@ -1,28 +1,19 @@
 import { QuizDatabase } from "../db/memoryDb";
-
-type QuestionResult = QuestionResultSuccess | QuestionResultFailure;
-
-type QuestionResultSuccess = {
-  kind: "success";
-};
-
-type QuestionResultFailure = {
-  kind: "failure";
-};
+import { Result } from "../types";
 
 export async function answerQuestion(
   db: QuizDatabase,
   questionId: string,
   userId: string,
   answer: string
-): Promise<QuestionResult> {
+): Promise<Result> {
   const question = await db.getQuestion(questionId);
   if (question.kind === "failure") {
     return { kind: "failure" };
   }
 
   const postAnswerToDb = await db.postAnswer(questionId, userId, answer);
-  if (postAnswerToDb !== "ok") {
+  if (postAnswerToDb.kind === "failure") {
     return { kind: "failure" };
   }
 
