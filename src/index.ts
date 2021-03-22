@@ -38,7 +38,7 @@ type QuestionActionInputFailure = {
 const processAnswerUserInput = (
   body: SlackAction,
   context: Context
-): Result<QuestionActionInputFailure, QuestionActionInputSuccess> => {
+): Result<QuestionActionInputSuccess, QuestionActionInputFailure> => {
   const questionId = context.actionIdMatches[1];
   const userId = body.user.id;
   const answer = context.actionIdMatches[2];
@@ -75,6 +75,11 @@ app.action(
     const { questionId, userId, answer } = questionActionUserInput;
 
     const result = await answerQuestion(db, questionId, userId, answer);
+
+    if (result.kind === "failure") {
+      await postEphemeral(`There was a problem submitting your answer.`);
+    }
+
     result.kind === "success"
       ? postEphemeral(
           `You answered option ${answer} to the question ${randomCelebrationEmoji()}`

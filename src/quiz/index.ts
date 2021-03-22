@@ -1,4 +1,4 @@
-import { QuizDatabase } from "../db/memoryDb";
+import { PostAnswerSuccess, QuizDatabase } from "../db/memoryDb";
 import { Result } from "../types";
 
 export async function answerQuestion(
@@ -6,7 +6,7 @@ export async function answerQuestion(
   questionId: string,
   userId: string,
   answer: string
-): Promise<Result> {
+): Promise<Result<PostAnswerSuccess>> {
   const question = await db.getQuestion(questionId);
   if (question.kind === "failure") {
     return { kind: "failure" };
@@ -17,5 +17,5 @@ export async function answerQuestion(
     return { kind: "failure" };
   }
 
-  return { kind: "success" };
+  return postAnswerToDb;
 }

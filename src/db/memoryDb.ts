@@ -6,7 +6,7 @@ type GetQuestionSuccess = {
   question: Question;
 };
 
-type PostAnswerSuccess = {
+export type PostAnswerSuccess = {
   action: QuestionDbAction;
   questionId: string;
   userId: string;
@@ -14,14 +14,12 @@ type PostAnswerSuccess = {
 };
 
 export type QuizDatabase = {
-  getQuestion(
-    questionId: string
-  ): Promise<Result<Record<string, unknown>, GetQuestionSuccess>>;
+  getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>>;
   postAnswer(
     questionId: string,
     userId: string,
     answer: string
-  ): Promise<Result<Record<string, unknown>, PostAnswerSuccess>>;
+  ): Promise<Result<PostAnswerSuccess>>;
 };
 
 type Option = {
@@ -75,9 +73,7 @@ type Answer = {
 const answers: Answer[] = [];
 
 class MemoryDb implements QuizDatabase {
-  async getQuestion(
-    questionId: string
-  ): Promise<Result<Record<string, unknown>, GetQuestionSuccess>> {
+  async getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>> {
     const result = questions.find((row) => row.id === questionId);
 
     if (result) {
@@ -94,7 +90,7 @@ class MemoryDb implements QuizDatabase {
     questionId: string,
     userId: string,
     answer: string
-  ): Promise<Result<Record<string, unknown>, PostAnswerSuccess>> {
+  ): Promise<Result<PostAnswerSuccess>> {
     const needle = answers.findIndex(
       (row) => row.questionId === questionId && row.userId === userId
     );
