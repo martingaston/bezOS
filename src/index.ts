@@ -78,13 +78,24 @@ app.action(
 
     if (result.kind === "failure") {
       await postEphemeral(`There was a problem submitting your answer.`);
+      return;
     }
 
-    result.kind === "success"
-      ? postEphemeral(
-          `You answered option ${answer} to the question ${randomCelebrationEmoji()}`
-        )
-      : postEphemeral(`There was an error submitting your answer`);
+    let message;
+    switch (result.action) {
+      case "CREATED":
+        message = `You answered option ${
+          result.answer
+        } to the question ${randomCelebrationEmoji()}`;
+        break;
+      case "UPDATED":
+        message = `You updated your answer to the question with option ${
+          result.answer
+        } ${randomCelebrationEmoji()}`;
+        break;
+    }
+
+    await postEphemeral(message);
   }
 );
 
