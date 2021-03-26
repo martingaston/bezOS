@@ -5,7 +5,7 @@ import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
 import { memoryDb } from "./db/memoryDb";
 import { createQuestionBlock } from "./slack/blocks/questionBlock";
-import { Result } from "./types";
+import { Answer, Result } from "./types";
 import { parseResponseMessage } from "./quiz/parsers";
 
 const db = memoryDb();
@@ -24,27 +24,16 @@ app.message("hello", async ({ say }) => {
   say(JSON.parse(block));
 });
 
-type QuestionActionInputSuccess = {
-  questionId: string;
-  userId: string;
-  answer: string;
-};
-
-type QuestionActionInputFailure = {
-  userId: string;
-  message: string;
-};
-
 const processAnswerUserInput = (
   body: SlackAction,
   context: Context
-): Result<QuestionActionInputSuccess, QuestionActionInputFailure> => {
+): Result<Answer, { message: string }> => {
   const questionId = context.actionIdMatches[1];
   const userId = body.user.id;
   const answer = context.actionIdMatches[2];
 
   if (typeof questionId !== "string" || typeof answer !== "string") {
-    return { kind: "failure", userId, message: "invalid user input provided" };
+    return { kind: "failure", message: "invalid user input provided" };
   }
 
   return { kind: "success", questionId, userId, answer };
