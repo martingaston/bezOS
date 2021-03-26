@@ -1,12 +1,12 @@
 import "./config"; // imports are hoisted so this needs to come first
-import { app } from "./app";
+import { app } from "./slack/app";
 import { getEnv } from "./util/getEnv";
-import { randomCelebrationEmoji } from "./util/randomCelebrationEmoji";
 import { answerQuestion } from "./quiz";
 import { Context, SlackAction } from "@slack/bolt";
 import { memoryDb } from "./db/memoryDb";
-import { createQuestionBlock } from "./blocks/questionBlock";
+import { createQuestionBlock } from "./slack/blocks/questionBlock";
 import { Result } from "./types";
+import { parseResponseMessage } from "./quiz/parsers";
 
 const db = memoryDb();
 
@@ -53,49 +53,20 @@ const processAnswerUserInput = (
 app.action(
   /^Question\((.*)\).Answer\((.*)\)$/,
   async ({ ack, body, context, client }) => {
-    // Acknowledge action request
     await ack();
 
-    const questionActionUserInput = processAnswerUserInput(body, context);
-
-    const postEphemeral = async (message: string) =>
-      await client.chat.postEphemeral({
-        channel: body.channel?.id ?? "",
-        user: questionActionUserInput.userId,
-        text: message,
-      });
-
-    if (questionActionUserInput.kind === "failure") {
-      await postEphemeral(
-        `There was an error submitting your answer: ${questionActionUserInput.message}`
-      );
+    const answer = processAnswerUserInput(body, context);
+    if (answer.kind === "failure") {
       return;
     }
 
-    const { questionId, userId, answer } = questionActionUserInput;
+    const result = await answerQuestion(db, answer);
 
-    const result = await answerQuestion(db, questionId, userId, answer);
-
-    if (result.kind === "failure") {
-      await postEphemeral(`There was a problem submitting your answer.`);
-      return;
-    }
-
-    let message;
-    switch (result.action) {
-      case "CREATED":
-        message = `You answered option ${
-          result.answer
-        } to the question ${randomCelebrationEmoji()}`;
-        break;
-      case "UPDATED":
-        message = `You updated your answer to the question with option ${
-          result.answer
-        } ${randomCelebrationEmoji()}`;
-        break;
-    }
-
-    await postEphemeral(message);
+    await client.chat.postEphemeral({
+      channel: body.channel?.id ?? "",
+      text: parseResponseMessage(result),
+      user: answer.userId,
+    });
   }
 );
 

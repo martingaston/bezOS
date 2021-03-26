@@ -1,4 +1,4 @@
-import { Question } from "../db/memoryDb";
+import { Question } from "../../db/memoryDb";
 
 export const createQuestionBlock = (
   question: Question,

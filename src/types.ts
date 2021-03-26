@@ -13,3 +13,9 @@ type ResultSuccess<T> = {
 type ResultFailure<E> = {
   kind: "failure";
 } & E;
+
+export type Answer = {
+  questionId: string;
+  userId: string;
+  answer: string;
+};
