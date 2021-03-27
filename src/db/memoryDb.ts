@@ -1,6 +1,6 @@
 import { Answer, Result } from "../types";
 
-type QuestionDbAction = "CREATED" | "UPDATED";
+type QuestionDbAction = "CREATED" | "UPDATED" | "NOOP";
 
 type GetQuestionSuccess = {
   question: Question;
@@ -92,6 +92,15 @@ class MemoryDb implements QuizDatabase {
         answer,
       };
     } else {
+      if (answers[needle].answer === answer) {
+        return {
+          kind: "success",
+          action: "NOOP",
+          questionId,
+          userId,
+          answer,
+        };
+      }
       answers[needle].answer = answer;
       return {
         kind: "success",

@@ -18,5 +18,7 @@ export const parseResponseMessage = (
       return `You updated your answer to the question with option ${
         result.answer
       } ${randomCelebrationEmoji()}`;
+    case "NOOP":
+      return `Your current answer to the question is already option ${result.answer} 😎`;
   }
 };
