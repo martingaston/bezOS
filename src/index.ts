@@ -1,18 +1,16 @@
 import "./config"; // imports are hoisted so this needs to come first
-import { app } from "./app";
+import { app } from "./slack/app";
 import { getEnv } from "./util/getEnv";
+import { getRoutes } from "./slack/routes";
+import { memoryDb } from "./db/memoryDb";
 
-// Listens to incoming messages that contain "hello"
-app.message("hello", async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  if (message.subtype === undefined) {
-    await say(`Hey there <@${message.user}>!`);
-  }
-});
+const db = memoryDb();
+
+getRoutes(app, db);
 
 (async () => {
   // Start your app
   await app.start(parseInt(getEnv("PORT")));
 
-  console.log("⚡️ Bolt app is running!");
+  console.log(`⚡️ Bolt app is running on port ${parseInt(getEnv("PORT"))}!`);
 })();
