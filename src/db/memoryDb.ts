@@ -12,6 +12,12 @@ export type PostAnswerSuccess = {
 
 export type QuizDatabase = {
   getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>>;
+  scheduleQuestion(
+    questionId: string,
+    slackTs: string,
+    startTime: Date,
+    endTime: Date
+  ): Promise<Result>;
   postAnswer(answer: Answer): Promise<Result<PostAnswerSuccess>>;
 };
 
@@ -59,7 +65,33 @@ const questions: Question[] = [
 
 const answers: Answer[] = [];
 
+type ScheduledQuestion = {
+  questionId: string;
+  slackTs: string;
+  startTime: Date;
+  endTime: Date;
+  active: boolean;
+};
+
+const scheduled: ScheduledQuestion[] = [];
 class MemoryDb implements QuizDatabase {
+  async scheduleQuestion(
+    questionId: string,
+    slackTs: string,
+    startTime: Date,
+    endTime: Date
+  ): Promise<Result> {
+    scheduled.push({
+      questionId,
+      slackTs,
+      startTime,
+      endTime,
+      active: true,
+    });
+
+    return { kind: "success" };
+  }
+
   async getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>> {
     const result = questions.find((row) => row.id === questionId);
 

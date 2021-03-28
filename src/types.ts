@@ -4,7 +4,7 @@ import { WebAPICallResult } from "@slack/web-api";
 // Also uses a default parameter incase you don't want to add extra bells and whistles to your response
 // Going against convention and using Success on the Left side to make Errors optional
 export type Result<
-  T extends Record<string, unknown>,
+  T extends Record<string, unknown> = { kind: "success" },
   E extends Record<string, unknown> = { kind: "failure" }
 > = ResultSuccess<T> | ResultFailure<E>;
 
