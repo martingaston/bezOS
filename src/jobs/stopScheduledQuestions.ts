@@ -12,13 +12,11 @@ export const stopScheduledQuestions = async (
   stopped.forEach((scheduledQuestion) => {
     client.chat.update({
       channel: "C01PDG2U3FY",
-      blocks: JSON.parse(
-        expiredQuestionBlock(
-          scheduledQuestion.question,
-          scheduledQuestion.endTime.toISOString()
-        )
-      )["blocks"],
-      text: "bye now",
+      blocks: expiredQuestionBlock(
+        scheduledQuestion.question,
+        Math.floor(scheduledQuestion.endTime.getTime() / 1000)
+      ),
+      text: "bezOS is closing this question.",
       ts: scheduledQuestion.slackTs,
     });
   });

@@ -14,15 +14,16 @@ export const getRoutes = (app: App, db: QuizDatabase): void => {
     const question = await db.getQuestion(questionId);
     let block;
     if (question.kind === "success") {
-      block = activeQuestionBlock(question.question, endTime.toISOString());
-    } else {
-      block = "whoops - an error!";
+      block = activeQuestionBlock(
+        question.question,
+        Math.floor(endTime.getTime() / 1000)
+      );
     }
 
-    // TODO: strengthen the types here
-    const { ts: slackTs } = (await say(
-      JSON.parse(block)
-    )) as SlackChatPostMessageResult;
+    const { ts: slackTs } = (await say({
+      blocks: block,
+      text: "A new question from bezOS!",
+    })) as SlackChatPostMessageResult;
 
     db.scheduleQuestion(questionId, slackTs, startTime, endTime);
   });

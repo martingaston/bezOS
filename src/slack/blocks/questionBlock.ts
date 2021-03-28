@@ -1,21 +1,22 @@
+import { Block, KnownBlock } from "@slack/bolt";
 import { Question } from "../../db/memoryDb";
 
 export const activeQuestionBlock = (
   question: Question,
-  endTime: string
-): string => baseQuestionBlock(true, question, endTime);
+  endTime: number
+): (Block | KnownBlock)[] => baseQuestionBlock(true, question, endTime);
 
 export const expiredQuestionBlock = (
   question: Question,
-  endTime: string
-): string => baseQuestionBlock(false, question, endTime);
+  endTime: number
+): (Block | KnownBlock)[] => baseQuestionBlock(false, question, endTime);
 
 const baseQuestionBlock = (
   isActive: boolean,
   question: Question,
-  endTime: string
-): string => {
-  const parsedOptions = question.options.reduce<Record<string, unknown>[]>(
+  endTime: number
+): (Block | KnownBlock)[] => {
+  const parsedOptions = question.options.reduce<(Block | KnownBlock)[]>(
     (parsed, option) => {
       if (isActive) {
         return parsed.concat([
@@ -50,33 +51,35 @@ const baseQuestionBlock = (
     },
     []
   );
-  return JSON.stringify({
-    blocks: [
-      {
-        type: "section",
-        text: {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `🤔 ${question.text}`,
+      },
+    },
+    {
+      type: "divider",
+    },
+    ...parsedOptions,
+    {
+      type: "divider",
+    },
+    {
+      type: "context",
+      elements: [
+        {
           type: "mrkdwn",
-          text: `🤔 ${question.text}`,
+          text: isActive
+            ? `⏱️ This question is open until <!date^${endTime}^{date_pretty} at {time}|${new Date(
+                endTime
+              ).toISOString()}>`
+            : `⛔ This question closed <!date^${endTime}^{date} at {time}|${new Date(
+                endTime
+              ).toISOString()}>`,
         },
-      },
-      {
-        type: "divider",
-      },
-      ...parsedOptions,
-      {
-        type: "divider",
-      },
-      {
-        type: "context",
-        elements: [
-          {
-            type: "mrkdwn",
-            text: isActive
-              ? `⏱️ This question is open until ${endTime}`
-              : `⛔ This question closed at ${endTime}`,
-          },
-        ],
-      },
-    ],
-  });
+      ],
+    },
+  ];
 };
