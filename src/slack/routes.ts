@@ -2,23 +2,30 @@ import { App, Context, SlackAction } from "@slack/bolt";
 import { QuizDatabase } from "../db/memoryDb";
 import { answerQuestion } from "../quiz";
 import { parseResponseMessage } from "../quiz/parsers";
-import { Result, Answer } from "../types";
-import { createQuestionBlock } from "./blocks/questionBlock";
+import { Result, Answer, SlackChatPostMessageResult } from "../types";
+import { activeQuestionBlock } from "./blocks/questionBlock";
 
 export const getRoutes = (app: App, db: QuizDatabase): void => {
   app.message("hello", async ({ say }) => {
-    const question = await db.getQuestion(
-      "ab75bf4f-61a5-43c9-b1fd-486901654b2e"
-    );
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + 60 * 1000);
+    const questionId = "ab75bf4f-61a5-43c9-b1fd-486901654b2e";
+
+    const question = await db.getQuestion(questionId);
     let block;
     if (question.kind === "success") {
-      block = createQuestionBlock(question.question, "2021-03-21T16:40:30Z");
-    } else {
-      block = "whoops - an error!";
+      block = activeQuestionBlock(
+        question.question,
+        Math.floor(endTime.getTime() / 1000)
+      );
     }
 
-    // TODO: strengthen the types here
-    say(JSON.parse(block));
+    const { ts: slackTs } = (await say({
+      blocks: block,
+      text: "A new question from bezOS!",
+    })) as SlackChatPostMessageResult;
+
+    db.scheduleQuestion(questionId, slackTs, startTime, endTime);
   });
 
   const processAnswerUserInput = (

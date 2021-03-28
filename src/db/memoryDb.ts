@@ -12,7 +12,20 @@ export type PostAnswerSuccess = {
 
 export type QuizDatabase = {
   getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>>;
+  scheduleQuestion(
+    questionId: string,
+    slackTs: string,
+    startTime: Date,
+    endTime: Date
+  ): Promise<Result>;
+  stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]>;
   postAnswer(answer: Answer): Promise<Result<PostAnswerSuccess>>;
+};
+
+type StoppedQuestion = {
+  question: Question;
+  slackTs: string;
+  endTime: Date;
 };
 
 type Option = {
@@ -59,7 +72,64 @@ const questions: Question[] = [
 
 const answers: Answer[] = [];
 
+type ScheduledQuestion = {
+  questionId: string;
+  slackTs: string;
+  startTime: Date;
+  endTime: Date;
+  active: boolean;
+};
+
+const scheduled: ScheduledQuestion[] = [];
 class MemoryDb implements QuizDatabase {
+  async stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]> {
+    const finished = scheduled.filter(
+      (question) =>
+        question.active && question.endTime.getTime() <= currentTime.getTime()
+    );
+
+    scheduled.forEach((question) => {
+      if (
+        question.active &&
+        question.endTime.getTime() <= currentTime.getTime()
+      ) {
+        question.active = false;
+      }
+    });
+
+    const stopped = finished.map(async (question) => {
+      const questionFromDb = await this.getQuestion(question.questionId);
+      if (questionFromDb.kind === "success") {
+        return {
+          question: questionFromDb.question,
+          slackTs: question.slackTs,
+          endTime: question.endTime,
+        };
+      }
+
+      throw new Error("dang");
+    });
+
+    return Promise.all(stopped);
+  }
+
+  async scheduleQuestion(
+    questionId: string,
+    slackTs: string,
+    startTime: Date,
+    endTime: Date
+  ): Promise<Result> {
+    scheduled.push({
+      questionId,
+      slackTs,
+      startTime,
+      endTime,
+      active: true,
+    });
+
+    return { kind: "success" };
+  }
+
   async getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>> {
     const result = questions.find((row) => row.id === questionId);
 
