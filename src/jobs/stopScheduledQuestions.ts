@@ -8,7 +8,6 @@ export const stopScheduledQuestions = async (
   client: WebClient
 ): Promise<void> => {
   const stopped = await db.stopScheduledQuestions(time);
-  console.log(stopped);
   stopped.forEach((scheduledQuestion) => {
     client.chat.update({
       channel: "C01PDG2U3FY",
