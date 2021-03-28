@@ -3,7 +3,7 @@ import { QuizDatabase } from "../db/memoryDb";
 import { answerQuestion } from "../quiz";
 import { parseResponseMessage } from "../quiz/parsers";
 import { Result, Answer } from "../types";
-import { createQuestionBlock } from "./blocks/questionBlock";
+import { activeQuestionBlock } from "./blocks/questionBlock";
 
 export const getRoutes = (app: App, db: QuizDatabase): void => {
   app.message("hello", async ({ say }) => {
@@ -12,7 +12,7 @@ export const getRoutes = (app: App, db: QuizDatabase): void => {
     );
     let block;
     if (question.kind === "success") {
-      block = createQuestionBlock(question.question, "2021-03-21T16:40:30Z");
+      block = activeQuestionBlock(question.question, "2021-03-21T16:40:30Z");
     } else {
       block = "whoops - an error!";
     }

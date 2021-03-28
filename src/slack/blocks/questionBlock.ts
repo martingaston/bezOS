@@ -1,29 +1,53 @@
 import { Question } from "../../db/memoryDb";
 
-export const createQuestionBlock = (
+export const activeQuestionBlock = (
+  question: Question,
+  endTime: string
+): string => baseQuestionBlock(true, question, endTime);
+
+export const expiredQuestionBlock = (
+  question: Question,
+  endTime: string
+): string => baseQuestionBlock(false, question, endTime);
+
+const baseQuestionBlock = (
+  isActive: boolean,
   question: Question,
   endTime: string
 ): string => {
   const parsedOptions = question.options.reduce<Record<string, unknown>[]>(
-    (parsed, option) =>
-      parsed.concat([
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: option.text,
-          },
-          accessory: {
-            type: "button",
+    (parsed, option) => {
+      if (isActive) {
+        return parsed.concat([
+          {
+            type: "section",
             text: {
-              type: "plain_text",
-              emoji: true,
-              text: option.name,
+              type: "mrkdwn",
+              text: option.text,
             },
-            action_id: `Question(${question.id}).Answer(${option.name})`,
+            accessory: {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: option.name,
+              },
+              action_id: `Question(${question.id}).Answer(${option.name})`,
+            },
           },
-        },
-      ]),
+        ]);
+      } else {
+        return parsed.concat([
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: option.text,
+            },
+          },
+        ]);
+      }
+    },
     []
   );
   return JSON.stringify({
@@ -47,7 +71,9 @@ export const createQuestionBlock = (
         elements: [
           {
             type: "mrkdwn",
-            text: `⏱️ This question is open until ${endTime}`,
+            text: isActive
+              ? `⏱️ This question is open until ${endTime}`
+              : `⛔ This question closed at ${endTime}`,
           },
         ],
       },
