@@ -18,7 +18,14 @@ export type QuizDatabase = {
     startTime: Date,
     endTime: Date
   ): Promise<Result>;
+  stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]>;
   postAnswer(answer: Answer): Promise<Result<PostAnswerSuccess>>;
+};
+
+type StoppedQuestion = {
+  question: Question;
+  slackTs: string;
+  endTime: Date;
 };
 
 type Option = {
@@ -75,6 +82,37 @@ type ScheduledQuestion = {
 
 const scheduled: ScheduledQuestion[] = [];
 class MemoryDb implements QuizDatabase {
+  async stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]> {
+    const finished = scheduled.filter(
+      (question) =>
+        question.active && question.endTime.getTime() <= currentTime.getTime()
+    );
+
+    scheduled.forEach((question) => {
+      if (
+        question.active &&
+        question.endTime.getTime() <= currentTime.getTime()
+      ) {
+        question.active = false;
+      }
+    });
+
+    const stopped = finished.map(async (question) => {
+      const questionFromDb = await this.getQuestion(question.questionId);
+      if (questionFromDb.kind === "success") {
+        return {
+          question: questionFromDb.question,
+          slackTs: question.slackTs,
+          endTime: question.endTime,
+        };
+      }
+
+      throw new Error("dang");
+    });
+
+    return Promise.all(stopped);
+  }
+
   async scheduleQuestion(
     questionId: string,
     slackTs: string,
