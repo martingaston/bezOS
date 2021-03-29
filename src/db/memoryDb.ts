@@ -72,15 +72,24 @@ const questions: Question[] = [
 
 const answers: Answer[] = [];
 
+// asked question? set question?
 type ScheduledQuestion = {
+  id: string;
   questionId: string;
-  slackTs: string;
   startTime: Date;
   endTime: Date;
   active: boolean;
+  notified: boolean;
+};
+
+type ScheduledQuestionSlackTs = {
+  scheduledQuestionId: string;
+  slackTs: string;
 };
 
 const scheduled: ScheduledQuestion[] = [];
+
+const scheduledSlackTs: ScheduledQuestionSlackTs[] = [];
 class MemoryDb implements QuizDatabase {
   async stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]> {
     const finished = scheduled.filter(
@@ -99,10 +108,14 @@ class MemoryDb implements QuizDatabase {
 
     const stopped = finished.map(async (question) => {
       const questionFromDb = await this.getQuestion(question.questionId);
-      if (questionFromDb.kind === "success") {
+      const slackTs = scheduledSlackTs.find(
+        (x) => x.scheduledQuestionId === question.id
+      );
+
+      if (questionFromDb.kind === "success" && slackTs !== undefined) {
         return {
           question: questionFromDb.question,
-          slackTs: question.slackTs,
+          slackTs: slackTs.slackTs,
           endTime: question.endTime,
         };
       }
@@ -119,12 +132,20 @@ class MemoryDb implements QuizDatabase {
     startTime: Date,
     endTime: Date
   ): Promise<Result> {
+    const id = (scheduled.length + 1).toString(); // this should be a uuid eventually
+
     scheduled.push({
+      id,
       questionId,
-      slackTs,
       startTime,
       endTime,
       active: true,
+      notified: false,
+    });
+
+    scheduledSlackTs.push({
+      scheduledQuestionId: id,
+      slackTs,
     });
 
     return { kind: "success" };
@@ -183,4 +204,17 @@ class MemoryDb implements QuizDatabase {
   }
 }
 
-export const memoryDb = (): QuizDatabase => new MemoryDb();
+const clearArray = <T>(array: T[]): void => {
+  while (array.length) {
+    array.pop();
+  }
+};
+
+const createNewDb = () => {
+  clearArray(answers);
+  clearArray(scheduled);
+  clearArray(scheduledSlackTs);
+  return new MemoryDb();
+};
+
+export const memoryDb = (): QuizDatabase => createNewDb();
