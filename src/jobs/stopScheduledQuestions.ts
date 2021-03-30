@@ -13,6 +13,7 @@ export const stopScheduledQuestions = async (
       channel: "C01PDG2U3FY",
       blocks: expiredQuestionBlock(
         scheduledQuestion.question,
+        scheduledQuestion.scheduledId,
         Math.floor(scheduledQuestion.endTime.getTime() / 1000)
       ),
       text: "bezOS is closing this question.",

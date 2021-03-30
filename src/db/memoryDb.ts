@@ -12,7 +12,9 @@ export type PostAnswerSuccess = {
 
 export type QuizDatabase = {
   getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>>;
+  getUnnotifedFinishedQuestions(): Promise<string[]>;
   scheduleQuestion(
+    scheduledId: string,
     questionId: string,
     slackTs: string,
     startTime: Date,
@@ -20,9 +22,12 @@ export type QuizDatabase = {
   ): Promise<Result>;
   stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]>;
   postAnswer(answer: Answer): Promise<Result<PostAnswerSuccess>>;
+  getAnswersByScheduledId(scheduledId: string): Promise<Answer[]>;
+  setScheduledQuestionToNotifiedById(scheduledId: string): Promise<void>;
 };
 
 type StoppedQuestion = {
+  scheduledId: string;
   question: Question;
   slackTs: string;
   endTime: Date;
@@ -91,6 +96,26 @@ const scheduled: ScheduledQuestion[] = [];
 
 const scheduledSlackTs: ScheduledQuestionSlackTs[] = [];
 class MemoryDb implements QuizDatabase {
+  async setScheduledQuestionToNotifiedById(scheduledId: string): Promise<void> {
+    scheduled.forEach((scheduledQuestion) => {
+      if (scheduledQuestion.id === scheduledId) {
+        scheduledQuestion.notified = true;
+      }
+    });
+  }
+
+  async getAnswersByScheduledId(scheduledId: string): Promise<Answer[]> {
+    return answers.filter((answer) => answer.scheduledId === scheduledId);
+  }
+
+  async getUnnotifedFinishedQuestions(): Promise<string[]> {
+    return scheduled
+      .filter(
+        (question) => question.active === false && question.notified === false
+      )
+      .map((x) => x.id);
+  }
+
   async stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]> {
     const finished = scheduled.filter(
       (question) =>
@@ -114,6 +139,7 @@ class MemoryDb implements QuizDatabase {
 
       if (questionFromDb.kind === "success" && slackTs !== undefined) {
         return {
+          scheduledId: question.id,
           question: questionFromDb.question,
           slackTs: slackTs.slackTs,
           endTime: question.endTime,
@@ -127,15 +153,14 @@ class MemoryDb implements QuizDatabase {
   }
 
   async scheduleQuestion(
+    scheduledId: string,
     questionId: string,
     slackTs: string,
     startTime: Date,
     endTime: Date
   ): Promise<Result> {
-    const id = (scheduled.length + 1).toString(); // this should be a uuid eventually
-
     scheduled.push({
-      id,
+      id: scheduledId,
       questionId,
       startTime,
       endTime,
@@ -144,7 +169,7 @@ class MemoryDb implements QuizDatabase {
     });
 
     scheduledSlackTs.push({
-      scheduledQuestionId: id,
+      scheduledQuestionId: scheduledId,
       slackTs,
     });
 
@@ -165,19 +190,24 @@ class MemoryDb implements QuizDatabase {
   }
 
   async postAnswer({
+    scheduledId,
     questionId,
     userId,
     answer,
   }: Answer): Promise<Result<PostAnswerSuccess>> {
     const needle = answers.findIndex(
-      (row) => row.questionId === questionId && row.userId === userId
+      (row) =>
+        row.scheduledId === scheduledId &&
+        row.questionId === questionId &&
+        row.userId === userId
     );
 
     if (needle === -1) {
-      answers.push({ questionId, userId, answer });
+      answers.push({ scheduledId, questionId, userId, answer });
       return {
         kind: "success",
         action: "CREATED",
+        scheduledId,
         questionId,
         userId,
         answer,
@@ -187,6 +217,7 @@ class MemoryDb implements QuizDatabase {
         return {
           kind: "success",
           action: "NOOP",
+          scheduledId,
           questionId,
           userId,
           answer,
@@ -196,6 +227,7 @@ class MemoryDb implements QuizDatabase {
       return {
         kind: "success",
         action: "UPDATED",
+        scheduledId,
         questionId,
         userId,
         answer,

@@ -6,6 +6,7 @@ import { memoryDb } from "./db/memoryDb";
 import { WebClient } from "@slack/web-api";
 import schedule from "node-schedule";
 import { stopScheduledQuestions } from "./jobs/stopScheduledQuestions";
+import { notifyRespondents } from "./jobs/notifyRespondents";
 
 const db = memoryDb();
 const slackClient = new WebClient(getEnv("SLACK_BOT_TOKEN"));
@@ -19,6 +20,13 @@ getRoutes(app, db);
   schedule.scheduleJob("* * * * *", async (time: Date) => {
     console.log(`Checking active questions at ${time.toISOString()}...`);
     await stopScheduledQuestions(time, db, slackClient);
+  });
+
+  schedule.scheduleJob("* * * * *", async (time: Date) => {
+    console.log(
+      `Checking whether users need notifying at ${time.toISOString()}...`
+    );
+    await notifyRespondents(db, slackClient);
   });
 
   console.log(`⚡️ Bolt app is running on port ${parseInt(getEnv("PORT"))}!`);

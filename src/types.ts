@@ -17,6 +17,7 @@ type ResultFailure<E> = {
 } & E;
 
 export type Answer = {
+  scheduledId: string;
   questionId: string;
   userId: string;
   answer: string;

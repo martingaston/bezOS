@@ -4,18 +4,21 @@ import { answerQuestion } from "../quiz";
 import { parseResponseMessage } from "../quiz/parsers";
 import { Result, Answer, SlackChatPostMessageResult } from "../types";
 import { activeQuestionBlock } from "./blocks/questionBlock";
+import { v4 as uuidv4 } from "uuid";
 
 export const getRoutes = (app: App, db: QuizDatabase): void => {
   app.message("hello", async ({ say }) => {
     const startTime = new Date();
     const endTime = new Date(startTime.getTime() + 60 * 1000);
     const questionId = "ab75bf4f-61a5-43c9-b1fd-486901654b2e";
+    const scheduledId = uuidv4();
 
     const question = await db.getQuestion(questionId);
     let block;
     if (question.kind === "success") {
       block = activeQuestionBlock(
         question.question,
+        scheduledId,
         Math.floor(endTime.getTime() / 1000)
       );
     }
@@ -25,7 +28,7 @@ export const getRoutes = (app: App, db: QuizDatabase): void => {
       text: "A new question from bezOS!",
     })) as SlackChatPostMessageResult;
 
-    db.scheduleQuestion(questionId, slackTs, startTime, endTime);
+    db.scheduleQuestion(scheduledId, questionId, slackTs, startTime, endTime);
   });
 
   const processAnswerUserInput = (
@@ -33,18 +36,23 @@ export const getRoutes = (app: App, db: QuizDatabase): void => {
     context: Context
   ): Result<Answer, { message: string }> => {
     const questionId = context.actionIdMatches[1];
+    const scheduledId = context.actionIdMatches[2];
     const userId = body.user.id;
-    const answer = context.actionIdMatches[2];
+    const answer = context.actionIdMatches[3];
 
-    if (typeof questionId !== "string" || typeof answer !== "string") {
+    if (
+      typeof scheduledId !== "string" ||
+      typeof questionId !== "string" ||
+      typeof answer !== "string"
+    ) {
       return { kind: "failure", message: "invalid user input provided" };
     }
 
-    return { kind: "success", questionId, userId, answer };
+    return { kind: "success", scheduledId, questionId, userId, answer };
   };
 
   app.action(
-    /^Question\((.*)\).Answer\((.*)\)$/,
+    /^Question\((.*)\).Scheduled\((.*)\).Answer\((.*)\)$/,
     async ({ ack, body, context, client }) => {
       await ack();
 
