@@ -3,17 +3,22 @@ import { Question } from "../../db/memoryDb";
 
 export const activeQuestionBlock = (
   question: Question,
+  scheduled: string,
   endTime: number
-): (Block | KnownBlock)[] => baseQuestionBlock(true, question, endTime);
+): (Block | KnownBlock)[] =>
+  baseQuestionBlock(true, question, scheduled, endTime);
 
 export const expiredQuestionBlock = (
   question: Question,
+  scheduled: string,
   endTime: number
-): (Block | KnownBlock)[] => baseQuestionBlock(false, question, endTime);
+): (Block | KnownBlock)[] =>
+  baseQuestionBlock(false, question, scheduled, endTime);
 
 const baseQuestionBlock = (
   isActive: boolean,
   question: Question,
+  scheduled: string,
   endTime: number
 ): (Block | KnownBlock)[] => {
   const parsedOptions = question.options.reduce<(Block | KnownBlock)[]>(
@@ -33,7 +38,7 @@ const baseQuestionBlock = (
                 emoji: true,
                 text: option.name,
               },
-              action_id: `Question(${question.id}).Answer(${option.name})`,
+              action_id: `Question(${question.id}).Scheduled(${scheduled}).Answer(${option.name})`,
             },
           },
         ]);

@@ -12,7 +12,9 @@ export type PostAnswerSuccess = {
 
 export type QuizDatabase = {
   getQuestion(questionId: string): Promise<Result<GetQuestionSuccess>>;
+  getUnnotifedFinishedQuestions(): Promise<string[]>;
   scheduleQuestion(
+    scheduledId: string,
     questionId: string,
     slackTs: string,
     startTime: Date,
@@ -20,9 +22,12 @@ export type QuizDatabase = {
   ): Promise<Result>;
   stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]>;
   postAnswer(answer: Answer): Promise<Result<PostAnswerSuccess>>;
+  getAnswersByScheduledId(scheduledId: string): Promise<Answer[]>;
+  setScheduledQuestionToNotifiedById(scheduledId: string): Promise<void>;
 };
 
 type StoppedQuestion = {
+  scheduledId: string;
   question: Question;
   slackTs: string;
   endTime: Date;
@@ -72,16 +77,45 @@ const questions: Question[] = [
 
 const answers: Answer[] = [];
 
+// asked question? set question?
 type ScheduledQuestion = {
+  id: string;
   questionId: string;
-  slackTs: string;
   startTime: Date;
   endTime: Date;
   active: boolean;
+  notified: boolean;
+};
+
+type ScheduledQuestionSlackTs = {
+  scheduledQuestionId: string;
+  slackTs: string;
 };
 
 const scheduled: ScheduledQuestion[] = [];
+
+const scheduledSlackTs: ScheduledQuestionSlackTs[] = [];
 class MemoryDb implements QuizDatabase {
+  async setScheduledQuestionToNotifiedById(scheduledId: string): Promise<void> {
+    scheduled.forEach((scheduledQuestion) => {
+      if (scheduledQuestion.id === scheduledId) {
+        scheduledQuestion.notified = true;
+      }
+    });
+  }
+
+  async getAnswersByScheduledId(scheduledId: string): Promise<Answer[]> {
+    return answers.filter((answer) => answer.scheduledId === scheduledId);
+  }
+
+  async getUnnotifedFinishedQuestions(): Promise<string[]> {
+    return scheduled
+      .filter(
+        (question) => question.active === false && question.notified === false
+      )
+      .map((x) => x.id);
+  }
+
   async stopScheduledQuestions(currentTime: Date): Promise<StoppedQuestion[]> {
     const finished = scheduled.filter(
       (question) =>
@@ -99,10 +133,15 @@ class MemoryDb implements QuizDatabase {
 
     const stopped = finished.map(async (question) => {
       const questionFromDb = await this.getQuestion(question.questionId);
-      if (questionFromDb.kind === "success") {
+      const slackTs = scheduledSlackTs.find(
+        (x) => x.scheduledQuestionId === question.id
+      );
+
+      if (questionFromDb.kind === "success" && slackTs !== undefined) {
         return {
+          scheduledId: question.id,
           question: questionFromDb.question,
-          slackTs: question.slackTs,
+          slackTs: slackTs.slackTs,
           endTime: question.endTime,
         };
       }
@@ -114,17 +153,24 @@ class MemoryDb implements QuizDatabase {
   }
 
   async scheduleQuestion(
+    scheduledId: string,
     questionId: string,
     slackTs: string,
     startTime: Date,
     endTime: Date
   ): Promise<Result> {
     scheduled.push({
+      id: scheduledId,
       questionId,
-      slackTs,
       startTime,
       endTime,
       active: true,
+      notified: false,
+    });
+
+    scheduledSlackTs.push({
+      scheduledQuestionId: scheduledId,
+      slackTs,
     });
 
     return { kind: "success" };
@@ -144,19 +190,24 @@ class MemoryDb implements QuizDatabase {
   }
 
   async postAnswer({
+    scheduledId,
     questionId,
     userId,
     answer,
   }: Answer): Promise<Result<PostAnswerSuccess>> {
     const needle = answers.findIndex(
-      (row) => row.questionId === questionId && row.userId === userId
+      (row) =>
+        row.scheduledId === scheduledId &&
+        row.questionId === questionId &&
+        row.userId === userId
     );
 
     if (needle === -1) {
-      answers.push({ questionId, userId, answer });
+      answers.push({ scheduledId, questionId, userId, answer });
       return {
         kind: "success",
         action: "CREATED",
+        scheduledId,
         questionId,
         userId,
         answer,
@@ -166,6 +217,7 @@ class MemoryDb implements QuizDatabase {
         return {
           kind: "success",
           action: "NOOP",
+          scheduledId,
           questionId,
           userId,
           answer,
@@ -175,6 +227,7 @@ class MemoryDb implements QuizDatabase {
       return {
         kind: "success",
         action: "UPDATED",
+        scheduledId,
         questionId,
         userId,
         answer,
@@ -183,4 +236,17 @@ class MemoryDb implements QuizDatabase {
   }
 }
 
-export const memoryDb = (): QuizDatabase => new MemoryDb();
+const clearArray = <T>(array: T[]): void => {
+  while (array.length) {
+    array.pop();
+  }
+};
+
+const createNewDb = () => {
+  clearArray(answers);
+  clearArray(scheduled);
+  clearArray(scheduledSlackTs);
+  return new MemoryDb();
+};
+
+export const memoryDb = (): QuizDatabase => createNewDb();
