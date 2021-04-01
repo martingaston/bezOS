@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "jest"
+    "test": "jest",
+    "migrate": "knex migrate:latest"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,9 @@
     "@slack/bolt": "^3.3.0",
     "@slack/web-api": "^6.1.0",
     "dotenv": "^8.2.0",
+    "knex": "^0.95.4",
     "node-schedule": "^2.0.0",
+    "pg": "^8.5.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
