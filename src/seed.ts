@@ -1,15 +1,31 @@
 import "./config";
 import { db } from "./db";
+import seedFile from "../seeds/aws-saa-c02-sample-exam-questions.json";
+import { QuestionType } from "./db/repositories/questions";
 
 (async () => {
-  const source = await db.questions.getOrCreateSourceFromName("Amazon");
-  const question = await db.questions.addNewQuestion({
-    text: "Testing From Node",
-    type: "MULTIPLE_CHOICE",
-    options: { A: "Test", B: 1234, C: true },
-    answer: "A",
-    source: source.id,
-  });
+  db.tx(async (t) => {
+    const source = await t.questions.getOrCreateSourceFromName(seedFile.source);
+    const toInsert = seedFile.questions.map(
+      async ({ answer, options, text, type }) => {
+        return await t.questions.addNewQuestion({
+          text,
+          type: parseType(type),
+          options,
+          answer,
+          source: source.id,
+        });
+      }
+    );
 
-  console.log(question);
+    await Promise.all(toInsert);
+  }).catch((e) => console.log(e));
 })();
+
+const parseType = (type: string): QuestionType => {
+  if (type === "MULTIPLE_CHOICE" || type === "MULTIPLE_RESPONSE") {
+    return type;
+  }
+
+  throw new Error("type must be MULTIPLE_CHOICE or MULTIPLE_RESPONSE");
+};

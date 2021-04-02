@@ -1,13 +1,23 @@
 import { IDatabase, IMain } from "pg-promise";
 
-type QuestionType = "MULTIPLE_CHOICE" | "MULTIPLE_RESPONSE";
+export type QuestionType = "MULTIPLE_CHOICE" | "MULTIPLE_RESPONSE";
 
-type Question = {
+export type Question = {
   text: string;
   type: QuestionType;
-  options: Record<string, unknown>;
-  answer: string;
+  options: QuestionOption[];
+  answer: QuestionAnswer;
   source: string;
+};
+
+type QuestionOption = {
+  name: string;
+  text: string;
+};
+
+type QuestionAnswer = {
+  value: string[];
+  text: string;
 };
 
 type Source = {
@@ -20,7 +30,7 @@ export class QuestionsRepository {
 
   async addNewQuestion(question: Question): Promise<Question> {
     return this.db.one(
-      "INSERT INTO bezos.questions (text, type, options, answer, source) VALUES (${text}, ${type}, ${options}, ${answer}, ${source}) RETURNING *;",
+      "INSERT INTO bezos.questions (text, type, options, answer, source) VALUES (${text}, ${type}, ${options:json}, ${answer}, ${source}) RETURNING *;",
       question
     );
   }
