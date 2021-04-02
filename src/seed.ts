@@ -2,7 +2,7 @@ import "./config";
 import { db } from "./db";
 
 (async () => {
-  const source = await db.questions.getSourceIdFromName("Amazon");
+  const source = await db.questions.getOrCreateSourceFromName("Amazon");
   const question = await db.questions.addNewQuestion({
     text: "Testing From Node",
     type: "MULTIPLE_CHOICE",

@@ -25,17 +25,9 @@ export class QuestionsRepository {
     );
   }
 
-  async test(): Promise<number> {
-    return this.db.one("SELECT 1");
-  }
-
-  async getSourceIdFromName(name: string): Promise<Source> {
-    return this.db.one("SELECT id FROM bezos.sources WHERE name = $1", name);
-  }
-
-  async addNewSource(name: string): Promise<Source> {
+  async getOrCreateSourceFromName(name: string): Promise<Source> {
     return this.db.one(
-      "INSERT INTO bezos.sources (name) VALUES ($1) RETURNING *",
+      "INSERT INTO bezos.sources (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = bezos.sources.name RETURNING *",
       name
     );
   }
