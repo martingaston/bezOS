@@ -22,6 +22,7 @@
   "dependencies": {
     "@slack/bolt": "^3.3.0",
     "@slack/web-api": "^6.1.0",
+    "camelcase-keys": "^6.2.2",
     "dotenv": "^8.2.0",
     "knex": "^0.95.4",
     "node-schedule": "^2.0.0",
