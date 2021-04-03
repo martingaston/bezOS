@@ -1,10 +1,10 @@
 import "./config";
-import { db, Tx } from "./db";
+import { db, Tx } from "./db/pg";
 import seedFile from "../seeds/aws-saa-c02-sample-exam-questions.json";
 import {
   InsertedQuestion as Question,
   QuestionType,
-} from "./db/repositories/questions";
+} from "./db/pg/repositories/questions";
 
 type SeedQuestionJson = {
   source: string;

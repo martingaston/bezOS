@@ -1,4 +1,4 @@
-import { QuizDatabase } from "../db/memoryDb";
+import { QuizDatabase } from "../db/memory/memoryDb";
 import { WebClient } from "@slack/web-api";
 import { expiredQuestionBlock } from "../slack/blocks/questionBlock";
 

@@ -1,5 +1,5 @@
 import { Block, KnownBlock } from "@slack/bolt";
-import { Question } from "../../db/memoryDb";
+import { Question } from "../../db/memory/memoryDb";
 
 export const activeQuestionBlock = (
   question: Question,

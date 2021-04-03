@@ -1,5 +1,5 @@
 import pgPromise, { IDatabase, ITask } from "pg-promise";
-import { getEnv } from "../util/getEnv";
+import { getEnv } from "../../util/getEnv";
 import { DbExtensions, QuestionsRepository } from "./repositories";
 import camelcaseKeys from "camelcase-keys";
 

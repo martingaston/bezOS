@@ -1,4 +1,4 @@
-import { Answer, Result } from "../types";
+import { Answer, Result } from "../../types";
 
 type QuestionDbAction = "CREATED" | "UPDATED" | "NOOP";
 
