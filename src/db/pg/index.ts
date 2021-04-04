@@ -21,4 +21,6 @@ const initOptions = {
 const pgp = pgPromise(initOptions);
 const db = pgp(getEnv("PG_CONNECTION_STRING"));
 
-export { pgp, db, Tx };
+const connect = (connectionString: string): Db => pgp(connectionString);
+
+export { connect, pgp, db, Tx, Db };
