@@ -27,6 +27,16 @@ export class MemoryQuestionsRepositorySpy {
 }
 
 export class MemoryQuestionsRepository implements QuestionsRepository {
+  async getQuestionById(id: number): Promise<InsertedQuestion> {
+    const found = questions.find((question) => question.id === id);
+
+    if (found === undefined) {
+      return Promise.reject(new Error("No question found with that id"));
+    }
+
+    return found;
+  }
+
   async addNewQuestion(question: Question): Promise<InsertedQuestion> {
     const inserted: InsertedQuestion = {
       id: nextIntId(questions),

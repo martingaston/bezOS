@@ -12,6 +12,12 @@ import {
 export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
 
+  async getQuestionById(id: number): Promise<InsertedQuestion> {
+    return this.db.one("SELECT * FROM bezos.questions WHERE id = ${id}", {
+      id,
+    });
+  }
+
   async addNewQuestion(question: Question): Promise<InsertedQuestion> {
     return this.db.one(
       "INSERT INTO bezos.questions (text, type, options, answer, source) VALUES (${text}, ${type}, ${options:json}, ${answer}, ${source}) RETURNING *;",

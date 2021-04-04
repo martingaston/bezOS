@@ -49,6 +49,26 @@ describe("INTEGRATION PgQuestionsRepository", () => {
     expect(result).toBe(1);
   });
 
+  test("can retreive a question by id", async () => {
+    const source = await db.questions.getOrCreateSourceFromName("TEST");
+    const question: Question = {
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [],
+      answer: {
+        value: ["A"],
+        text: "A test answer",
+      },
+      source: source.id,
+    };
+
+    const { id } = await db.questions.addNewQuestion(question);
+
+    const result = await db.questions.getQuestionById(id);
+
+    expect(result.id).toBe(id);
+  });
+
   test("does not create a new source when the same name is given", async () => {
     await db.questions.getOrCreateSourceFromName("TEST");
     await db.questions.getOrCreateSourceFromName("TEST");

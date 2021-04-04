@@ -32,6 +32,25 @@ describe("MemoryQuestionsRepository", () => {
     expect(spy.questions.length).toBe(1);
   });
 
+  test("can get a question", async () => {
+    const question: Question = {
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [],
+      answer: {
+        value: ["A"],
+        text: "A test answer",
+      },
+      source: source.id,
+    };
+
+    const { id } = await db.addNewQuestion(question);
+
+    const result = await db.getQuestionById(id);
+
+    expect(result.id).toBe(id);
+  });
+
   test("will not create duplicate sources", async () => {
     const sourceName = "Test Source";
 

@@ -4,6 +4,7 @@ export interface QuizRepository {
 
 export interface QuestionsRepository {
   addNewQuestion(question: Question): Promise<InsertedQuestion>;
+  getQuestionById(id: number): Promise<InsertedQuestion>;
   getOrCreateSourceFromName(name: string): Promise<Source>;
   addRound(name: string, description: string): Promise<Round>;
   scheduleRoundQuestion(
