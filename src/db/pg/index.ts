@@ -1,14 +1,15 @@
 import pgPromise, { IDatabase, ITask } from "pg-promise";
 import { getEnv } from "../../util/getEnv";
-import { DbExtensions, QuestionsRepository } from "./repositories";
+import { PgQuestionsRepository } from "./repositories";
 import camelcaseKeys from "camelcase-keys";
+import { QuizRepository } from "../types";
 
-type Db = IDatabase<DbExtensions> & DbExtensions;
-type Tx = ITask<DbExtensions> & DbExtensions;
+type Db = IDatabase<QuizRepository> & QuizRepository;
+type Tx = ITask<QuizRepository> & QuizRepository;
 
 const initOptions = {
   extend(obj: Db) {
-    obj.questions = new QuestionsRepository(obj, pgp);
+    obj.questions = new PgQuestionsRepository(obj, pgp);
   },
   // TODO type this properly
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

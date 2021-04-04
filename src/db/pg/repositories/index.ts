@@ -1,7 +1,3 @@
-import { QuestionsRepository } from "./questions";
+import { PgQuestionsRepository } from "./questions";
 
-interface DbExtensions {
-  questions: QuestionsRepository;
-}
-
-export { QuestionsRepository, DbExtensions };
+export { PgQuestionsRepository };
