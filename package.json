@@ -5,7 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "jest",
+    "test": "jest --testNamePattern='^((?!INTEGRATION).)*$'",
+    "test:integration": "JEST_WORKERS=3 jest --maxWorkers=$JEST_WORKERS --testNamePattern='INTEGRATION'",
+    "test:all": "JEST_WORKERS=3 jest --maxWorkers=$JEST_WORKERS",
     "migrate": "knex migrate:latest"
   },
   "repository": {
