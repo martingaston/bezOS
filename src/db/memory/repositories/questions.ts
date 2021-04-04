@@ -19,6 +19,13 @@ const sources: Source[] = [];
 
 const nextIntId = <T>(arr: T[]): number => arr.length + 1;
 
+export class MemoryQuestionsRepositorySpy {
+  public questions = questions;
+  public rounds = rounds;
+  public rounds_questions = rounds_questions;
+  public sources = sources;
+}
+
 export class MemoryQuestionsRepository implements QuestionsRepository {
   async addNewQuestion(question: Question): Promise<InsertedQuestion> {
     const inserted: InsertedQuestion = {
