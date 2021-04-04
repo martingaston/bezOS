@@ -1,4 +1,4 @@
-import { QuizDatabase } from "../db/memory/memoryDb";
+import { QuizDatabase } from "../db/memory/oldMemoryDb";
 import { WebClient } from "@slack/web-api";
 
 // TODO this gets the first finished question that needs users to be notified and processes it

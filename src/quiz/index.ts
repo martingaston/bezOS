@@ -1,4 +1,4 @@
-import { PostAnswerSuccess, QuizDatabase } from "../db/memory/memoryDb";
+import { PostAnswerSuccess, QuizDatabase } from "../db/memory/oldMemoryDb";
 import { Answer, Result } from "../types";
 
 export async function answerQuestion(

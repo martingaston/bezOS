@@ -1,4 +1,4 @@
-import { memoryDb, QuizDatabase } from "./memoryDb";
+import { memoryDb, QuizDatabase } from "./oldMemoryDb";
 
 // TODO: these tests are pretty ghastly and need tidying up, along with the API
 describe("memoryDb", () => {
