@@ -1,6 +1,8 @@
 import knex from "knex";
 import { getEnv } from "../src/util/getEnv";
 
+// TODO this might be able to be handled by jest itself in jest 27: https://github.com/facebook/jest/pull/8751
+
 (async (): Promise<void> => {
   const db = knex({
     client: "postgresql",
