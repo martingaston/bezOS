@@ -1,17 +1,11 @@
 import { getEnv } from "../../../util/getEnv";
 import { Question } from "../../types";
-import { connect, Db } from "../../pg";
-import {
-  createDbsAndMigrate,
-  resetDbBetweenTests,
-} from "../../../../test/setupIntegrationDb";
-import { teardownDbs } from "../../../../test/teardownIntegrationDb";
+import { connect, Db } from "..";
+import { resetDbBetweenTests } from "../../../../test/resetDbBetweenTests";
 
-beforeAll(async () => createDbsAndMigrate());
 beforeEach(async () => resetDbBetweenTests());
-afterAll(async () => teardownDbs());
 
-describe("INTEGRATION PgQuestionsRepository", () => {
+describe("PgQuestionsRepository", () => {
   let db: Db;
   const PG_CONNECTION_STRING = `postgresql://postgres:postgres@localhost:5432/bezos_test_${getEnv(
     "JEST_WORKER_ID"

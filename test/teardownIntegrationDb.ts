@@ -1,7 +1,7 @@
 import knex from "knex";
 import { getEnv } from "../src/util/getEnv";
 
-export const teardownDbs = async (): Promise<void> => {
+(async () => {
   const db = knex({
     client: "postgresql",
     connection: "postgresql://postgres:postgres@localhost:5432",
@@ -19,4 +19,4 @@ export const teardownDbs = async (): Promise<void> => {
 
   await Promise.all(test_dbs);
   await db.destroy();
-};
+})();
