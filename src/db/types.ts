@@ -9,15 +9,12 @@ export interface UsersRepository {
 }
 
 export type User = {
-  id: string;
   slackId: string;
+  userId: string;
 };
 
 export interface AnswersRepository {
-  addAnswerToRoundQuestion(
-    answer: Answer,
-    roundQuestionId: string
-  ): Promise<InsertedAnswer>;
+  addAnswerToRoundQuestion(answer: Answer): Promise<InsertedAnswer>;
 }
 
 export type Answer = {
