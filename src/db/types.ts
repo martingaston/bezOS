@@ -1,6 +1,32 @@
 export interface QuizRepository {
   questions: QuestionsRepository;
+  users: UsersRepository;
+  answers: AnswersRepository;
 }
+
+export interface UsersRepository {
+  getOrAddUserFromSlack(slackUserId: string): Promise<User>;
+}
+
+export type User = {
+  id: string;
+  slackId: string;
+};
+
+export interface AnswersRepository {
+  addAnswerToRoundQuestion(
+    answer: Answer,
+    roundQuestionId: string
+  ): Promise<InsertedAnswer>;
+}
+
+export type Answer = {
+  roundQuestionId: string;
+  userId: string;
+  answer: string[];
+};
+
+export type InsertedAnswer = Answer & intId;
 
 export interface QuestionsRepository {
   addNewQuestion(question: Question): Promise<InsertedQuestion>;
