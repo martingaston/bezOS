@@ -67,6 +67,19 @@ export class MemoryQuestionsRepository implements QuestionsRepository {
     return inserted;
   }
 
+  async getInactiveRoundQuestion(round: Round): Promise<RoundQuestion> {
+    const found = rounds_questions.find(
+      (roundQuestion) =>
+        roundQuestion.roundId === round.id && roundQuestion.active === false
+    );
+
+    if (found === undefined) {
+      return Promise.reject();
+    }
+
+    return found;
+  }
+
   async scheduleRoundQuestion(
     roundQuestion: RoundQuestion
   ): Promise<InsertedRoundQuestion> {
@@ -75,3 +88,19 @@ export class MemoryQuestionsRepository implements QuestionsRepository {
     return inserted;
   }
 }
+
+const clearArray = <T>(array: T[]): void => {
+  while (array.length) {
+    array.pop();
+  }
+};
+
+const createNewDb = () => {
+  clearArray(questions);
+  clearArray(rounds);
+  clearArray(rounds_questions);
+  clearArray(sources);
+  return new MemoryQuestionsRepository();
+};
+
+export const createNewMemoryDb = (): MemoryQuestionsRepository => createNewDb();

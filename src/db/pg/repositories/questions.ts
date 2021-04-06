@@ -11,7 +11,6 @@ import {
 
 export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
-
   async getQuestionById(id: number): Promise<InsertedQuestion> {
     return this.db.one("SELECT * FROM bezos.questions WHERE id = ${id}", {
       id,
@@ -45,6 +44,13 @@ export class PgQuestionsRepository implements QuestionsRepository {
     return this.db.one(
       "INSERT INTO bezos.rounds_questions (question_id, round_id, active) VALUES (${questionId}, ${roundId}, FALSE) RETURNING *",
       roundQuestion
+    );
+  }
+
+  async getInactiveRoundQuestion(round: Round): Promise<RoundQuestion> {
+    return this.db.one(
+      "SELECT * FROM bezos.rounds_questions WHERE round_id = ${id} AND active = FALSE LIMIT 1",
+      round
     );
   }
 }

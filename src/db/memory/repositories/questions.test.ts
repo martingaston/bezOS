@@ -1,5 +1,6 @@
 import { Question, Source } from "../../types";
 import {
+  createNewMemoryDb,
   MemoryQuestionsRepository,
   MemoryQuestionsRepositorySpy,
 } from "./questions";
@@ -10,7 +11,7 @@ describe("MemoryQuestionsRepository", () => {
   let source: Source;
 
   beforeEach(async () => {
-    db = new MemoryQuestionsRepository();
+    db = createNewMemoryDb();
     spy = new MemoryQuestionsRepositorySpy();
     source = await db.getOrCreateSourceFromName("Test Source");
   });
@@ -69,6 +70,27 @@ describe("MemoryQuestionsRepository", () => {
     expect(spy.rounds.length).toBe(1);
   });
 
+  test("will find an inactive round question", async () => {
+    const round = await db.addRound("Test Round", "this is a test round");
+    const question = await db.addNewQuestion({
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [{ name: "A", text: "Test" }],
+      answer: { value: ["A"], text: "A is the answer" },
+      source: "source-uuid-here",
+    });
+    const roundQuestion = await db.scheduleRoundQuestion({
+      questionId: question.id,
+      roundId: round.id,
+      startDate: new Date(),
+      endDate: new Date(),
+      active: false,
+    });
+
+    const result = await db.getInactiveRoundQuestion(round);
+    expect(result.questionId).toEqual(question.id);
+  });
+
   test("will schedule a round question", async () => {
     await db.scheduleRoundQuestion({
       questionId: 1,
@@ -78,6 +100,6 @@ describe("MemoryQuestionsRepository", () => {
       active: false,
     });
 
-    expect(spy.rounds.length).toBe(1);
+    expect(spy.rounds_questions.length).toBe(1);
   });
 });
