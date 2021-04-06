@@ -1,10 +1,7 @@
 import "./config";
-import { db, Tx } from "./db";
+import { db, Tx } from "./db/pg";
 import seedFile from "../seeds/aws-saa-c02-sample-exam-questions.json";
-import {
-  InsertedQuestion as Question,
-  QuestionType,
-} from "./db/repositories/questions";
+import { InsertedQuestion, QuestionType } from "./db/types";
 
 type SeedQuestionJson = {
   source: string;
@@ -63,7 +60,10 @@ class Seed {
     return await this.db.questions.addRound(name, description);
   }
 
-  public async scheduleQuestions(questions: Question[], roundId: number) {
+  public async scheduleQuestions(
+    questions: InsertedQuestion[],
+    roundId: number
+  ) {
     const toSchedule = questions.map(async (question) => {
       return await this.db.questions.scheduleRoundQuestion({
         questionId: question.id,

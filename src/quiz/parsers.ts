@@ -1,4 +1,4 @@
-import { PostAnswerSuccess } from "../db/memoryDb";
+import { PostAnswerSuccess } from "../db/memory/oldMemoryDb";
 import { Result } from "../types";
 import { randomCelebrationEmoji } from "../util/randomCelebrationEmoji";
 

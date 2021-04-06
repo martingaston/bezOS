@@ -1,5 +1,5 @@
 import { App, Context, SlackAction } from "@slack/bolt";
-import { QuizDatabase } from "../db/memoryDb";
+import { QuizDatabase } from "../db/memory/oldMemoryDb";
 import { answerQuestion } from "../quiz";
 import { parseResponseMessage } from "../quiz/parsers";
 import { Result, Answer, SlackChatPostMessageResult } from "../types";

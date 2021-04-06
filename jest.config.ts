@@ -96,7 +96,20 @@ export default {
   preset: "ts-jest",
 
   // Run tests from one or more projects
-  // projects: undefined,
+  projects: [
+    {
+      displayName: "test",
+      testMatch: ["**/!(*.integration.)+(spec|test).[jt]s?(x)"],
+      preset: "ts-jest",
+      setupFiles: ["dotenv/config"],
+    },
+    {
+      displayName: "integration",
+      testMatch: ["**/?(*.)+(integration.)+(spec|test).[jt]s?(x)"],
+      preset: "ts-jest",
+      setupFiles: ["dotenv/config"],
+    },
+  ],
 
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
@@ -152,9 +165,7 @@ export default {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  testPathIgnorePatterns: ["/node_modules/"],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],

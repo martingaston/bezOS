@@ -2,7 +2,7 @@ import "./config"; // imports are hoisted so this needs to come first
 import { app } from "./slack/app";
 import { getEnv } from "./util/getEnv";
 import { getRoutes } from "./slack/routes";
-import { memoryDb } from "./db/memoryDb";
+import { memoryDb } from "./db/memory/oldMemoryDb";
 import { WebClient } from "@slack/web-api";
 import schedule from "node-schedule";
 import { stopScheduledQuestions } from "./jobs/stopScheduledQuestions";

@@ -1,58 +1,22 @@
 import { IDatabase, IMain } from "pg-promise";
+import {
+  Question,
+  InsertedQuestion,
+  InsertedRoundQuestion,
+  Round,
+  RoundQuestion,
+  Source,
+  QuestionsRepository,
+} from "../../types";
 
-export type QuestionType = "MULTIPLE_CHOICE" | "MULTIPLE_RESPONSE";
-
-type Question = {
-  text: string;
-  type: QuestionType;
-  options: QuestionOption[];
-  answer: QuestionAnswer;
-  source: string;
-};
-
-type intId = {
-  id: number;
-};
-
-type uuidId = {
-  id: string;
-};
-
-export type InsertedQuestion = Question & intId;
-
-type QuestionOption = {
-  name: string;
-  text: string;
-};
-
-type QuestionAnswer = {
-  value: string[];
-  text: string;
-};
-
-type Source = {
-  id: string;
-  name: string;
-};
-
-type Round = {
-  id: number;
-  name: string;
-  description: string;
-};
-
-type RoundQuestion = {
-  questionId: number;
-  roundId: number;
-  startDate: Date;
-  endDate: Date;
-  active: boolean;
-};
-
-type InsertedRoundQuestion = RoundQuestion & uuidId;
-
-export class QuestionsRepository {
+export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
+
+  async getQuestionById(id: number): Promise<InsertedQuestion> {
+    return this.db.one("SELECT * FROM bezos.questions WHERE id = ${id}", {
+      id,
+    });
+  }
 
   async addNewQuestion(question: Question): Promise<InsertedQuestion> {
     return this.db.one(

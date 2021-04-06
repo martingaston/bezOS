@@ -9,6 +9,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PG_CONNECTION_STRING: ${{ secrets.PG_CONNECTION_STRING }}
+      PG_CONNECTION_STRING_TEST: ${{ secrets.PG_CONNECTION_STRING_TEST }}
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -17,4 +32,4 @@ jobs:
         with:
           node-version: 15.x
       - run: npm ci
-      - run: npm test
+      - run: npm run test:all
