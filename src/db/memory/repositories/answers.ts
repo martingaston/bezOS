@@ -1,7 +1,11 @@
 import { Answer, AnswersRepository, InsertedAnswer } from "../../types";
 
+const answers: InsertedAnswer[] = [];
 export class MemoryAnswersRepository implements AnswersRepository {
-  addAnswerToRoundQuestion(answer: Answer): Promise<InsertedAnswer> {
-    throw new Error("Method not implemented.");
+  async addAnswerToRoundQuestion(answer: Answer): Promise<InsertedAnswer> {
+    const toInsert = { ...answer, id: 1 };
+    answers.push(toInsert);
+
+    return toInsert;
   }
 }

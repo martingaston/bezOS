@@ -13,6 +13,11 @@ export type User = {
   userId: string;
 };
 
+export type UserSlackNotification = {
+  id: string;
+  userId: string;
+};
+
 export interface AnswersRepository {
   addAnswerToRoundQuestion(answer: Answer): Promise<InsertedAnswer>;
 }

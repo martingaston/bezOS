@@ -1,5 +1,5 @@
 import { IDatabase, IMain } from "pg-promise";
-import { User, UsersRepository } from "../../types";
+import { User, UserSlackNotification, UsersRepository } from "../../types";
 export class PgUsersRepository implements UsersRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
 
@@ -13,7 +13,7 @@ export class PgUsersRepository implements UsersRepository {
       return slackUserIdExistsInDb;
     }
 
-    const newUser = await this.db.one<{ id: string; createdAt: Date }>(
+    const newUser = await this.db.one<UserSlackNotification>(
       "INSERT INTO bezos.users VALUES (DEFAULT, DEFAULT) RETURNING *"
     );
 
