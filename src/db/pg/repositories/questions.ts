@@ -11,6 +11,14 @@ import {
 
 export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
+
+  async setActiveRound(round: Round): Promise<void> {
+    await this.db.query("TRUNCATE bezos.active_round");
+    await this.db.none("INSERT INTO bezos.active_round VALUES ($1)", [
+      round.id,
+    ]);
+  }
+
   async getQuestionById(id: number): Promise<InsertedQuestion> {
     return this.db.one("SELECT * FROM bezos.questions WHERE id = ${id}", {
       id,

@@ -102,4 +102,12 @@ describe("MemoryQuestionsRepository", () => {
 
     expect(spy.rounds_questions.length).toBe(1);
   });
+
+  test("will set the active round", async () => {
+    const round = await db.addRound("Test Round", "This is a testing round");
+
+    await db.setActiveRound(round);
+
+    expect(spy.activeRound()).toBe(round.id);
+  });
 });

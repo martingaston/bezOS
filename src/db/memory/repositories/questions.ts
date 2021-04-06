@@ -17,6 +17,8 @@ const rounds_questions: InsertedRoundQuestion[] = [];
 
 const sources: Source[] = [];
 
+let activeRound: number | null = null;
+
 const nextIntId = <T>(arr: T[]): number => arr.length + 1;
 
 export class MemoryQuestionsRepositorySpy {
@@ -24,9 +26,14 @@ export class MemoryQuestionsRepositorySpy {
   public rounds = rounds;
   public rounds_questions = rounds_questions;
   public sources = sources;
+  public activeRound = (): number | null => activeRound;
 }
 
 export class MemoryQuestionsRepository implements QuestionsRepository {
+  async setActiveRound(round: Round): Promise<void> {
+    activeRound = round.id;
+  }
+
   async getQuestionById(id: number): Promise<InsertedQuestion> {
     const found = questions.find((question) => question.id === id);
 
@@ -100,6 +107,7 @@ const createNewDb = () => {
   clearArray(rounds);
   clearArray(rounds_questions);
   clearArray(sources);
+  activeRound = null;
   return new MemoryQuestionsRepository();
 };
 

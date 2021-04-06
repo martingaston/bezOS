@@ -147,4 +147,19 @@ describe("PgQuestionsRepository", () => {
     expect(scheduled.active).toBe(false);
     expect(scheduled.questionId).toBe(question.id);
   });
+
+  test("will set the active round", async () => {
+    const round = await db.questions.addRound(
+      "Test Round",
+      "This is a testing round"
+    );
+
+    await db.questions.setActiveRound(round);
+
+    const result = await db.one<{ activeRound: number }>(
+      "SELECT * FROM bezos.active_round"
+    );
+
+    expect(result.activeRound).toBe(round.id);
+  });
 });

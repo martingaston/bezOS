@@ -35,6 +35,7 @@ export interface QuestionsRepository {
   getQuestionById(id: number): Promise<InsertedQuestion>;
   getOrCreateSourceFromName(name: string): Promise<Source>;
   addRound(name: string, description: string): Promise<Round>;
+  setActiveRound(round: Round): Promise<void>;
   getInactiveRoundQuestion(round: Round): Promise<RoundQuestion>;
   scheduleRoundQuestion(
     roundQuestion: RoundQuestion
