@@ -6,7 +6,7 @@ import { getEnv } from "../src/util/getEnv";
 (async (): Promise<void> => {
   const db = knex({
     client: "postgresql",
-    connection: "postgresql://postgres:postgres@postgres:5432",
+    connection: "postgresql://postgres:postgres@localhost:5432",
   });
 
   await db.raw(`DROP DATABASE IF EXISTS bezos_test`);
