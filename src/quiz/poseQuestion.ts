@@ -1,4 +1,5 @@
-import { Question, QuizRepository } from "../db/types";
+import { QuizRepository } from "../db/types";
+import { PosedQuestion } from "./types";
 
 type QuizAction = "SCHEDULED";
 
@@ -14,18 +15,13 @@ type QuizResultFailure = {
   error?: string;
 };
 
-export const poseQuestion = (
+export const poseQuestion = async (
   db: QuizRepository
-): Promise<Question & QuizResult> => {
-  const question: Question = {
-    text: "A Question",
-    type: "MULTIPLE_CHOICE",
-    options: [{ name: "A", text: "stuff" }],
-    answer: { value: ["A"], text: "a is the right answer " },
-    source: "source-uuid",
-  };
-
+): Promise<PosedQuestion & QuizResult> => {
+  const round = await db.questions.getActiveRound();
+  const roundQuestion = await db.questions.getInactiveRoundQuestion(round);
+  const question = await db.questions.getQuestionById(roundQuestion.questionId);
   const result: QuizResultSuccess = { kind: "success" };
 
-  return Promise.resolve({ ...question, ...result });
+  return Promise.resolve({ id: roundQuestion.id, question, ...result });
 };

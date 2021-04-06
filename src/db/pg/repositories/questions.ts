@@ -11,6 +11,11 @@ import {
 
 export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
+  async getActiveRound(): Promise<Round> {
+    return await this.db.one(
+      "SELECT * FROM bezos.rounds WHERE id = (SELECT active_round FROM bezos.active_round LIMIT 1)"
+    );
+  }
 
   async setActiveRound(round: Round): Promise<void> {
     await this.db.query("TRUNCATE bezos.active_round");
@@ -55,7 +60,7 @@ export class PgQuestionsRepository implements QuestionsRepository {
     );
   }
 
-  async getInactiveRoundQuestion(round: Round): Promise<RoundQuestion> {
+  async getInactiveRoundQuestion(round: Round): Promise<InsertedRoundQuestion> {
     return this.db.one(
       "SELECT * FROM bezos.rounds_questions WHERE round_id = ${id} AND active = FALSE LIMIT 1",
       round

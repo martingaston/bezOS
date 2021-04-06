@@ -5,7 +5,10 @@ import {
   UsersRepository,
 } from "../types";
 import { MemoryAnswersRepository } from "./repositories/answers";
-import { MemoryQuestionsRepository } from "./repositories/questions";
+import {
+  MemoryQuestionsRepository,
+  createNewMemoryDb,
+} from "./repositories/questions";
 import { MemoryUsersRepository } from "./repositories/users";
 
 class MemoryDb implements QuizRepository {
@@ -17,6 +20,10 @@ class MemoryDb implements QuizRepository {
     this.questions = new MemoryQuestionsRepository();
     this.users = new MemoryUsersRepository();
     this.answers = new MemoryAnswersRepository();
+  }
+
+  reset() {
+    this.questions = createNewMemoryDb();
   }
 }
 

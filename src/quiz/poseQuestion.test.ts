@@ -12,6 +12,7 @@ const addInactiveRoundQuestion = async (
     "TEST ROUND",
     "A round for testing"
   );
+  await db.questions.setActiveRound(round);
   const question = await db.questions.addNewQuestion({
     text: "What's the first letter of the English alphabet?",
     type: "MULTIPLE_CHOICE",
@@ -37,13 +38,21 @@ const addInactiveRoundQuestion = async (
 };
 
 describe("poseQuestion", () => {
-  test("it will schedule a question when one is in the database", async () => {
-    addInactiveRoundQuestion(db);
-    expect(poseQuestion(db)).resolves.toMatchObject({ kind: "success" });
+  beforeEach(() => {
+    db.reset();
   });
 
-  xtest("it will reject when the database has no questions in it", () => {
-    addInactiveRoundQuestion(db);
-    expect(poseQuestion(db)).rejects.toMatch("error");
+  test("it will schedule a question when one is in the database", async () => {
+    const { id } = await addInactiveRoundQuestion(db);
+    expect(poseQuestion(db)).resolves.toMatchObject({ kind: "success", id });
+  });
+
+  test("it will reject when the active round has no questions", async () => {
+    await addInactiveRoundQuestion(db);
+    const newRound = await db.questions.addRound("test", "testing");
+    await db.questions.setActiveRound(newRound);
+    expect(poseQuestion(db)).rejects.toMatch(
+      "There are no inactive round questions available" // TODO consistent errors across memory and pg dbs
+    );
   });
 });

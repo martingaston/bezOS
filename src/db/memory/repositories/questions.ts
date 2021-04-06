@@ -30,6 +30,15 @@ export class MemoryQuestionsRepositorySpy {
 }
 
 export class MemoryQuestionsRepository implements QuestionsRepository {
+  async getActiveRound(): Promise<Round> {
+    const round = rounds.filter((round) => round.id === activeRound);
+    if (round.length !== 1) {
+      return Promise.reject("Something went wrong");
+    }
+
+    return round[0];
+  }
+
   async setActiveRound(round: Round): Promise<void> {
     activeRound = round.id;
   }
@@ -74,14 +83,14 @@ export class MemoryQuestionsRepository implements QuestionsRepository {
     return inserted;
   }
 
-  async getInactiveRoundQuestion(round: Round): Promise<RoundQuestion> {
+  async getInactiveRoundQuestion(round: Round): Promise<InsertedRoundQuestion> {
     const found = rounds_questions.find(
       (roundQuestion) =>
         roundQuestion.roundId === round.id && roundQuestion.active === false
     );
 
     if (found === undefined) {
-      return Promise.reject();
+      return Promise.reject("There are no inactive round questions available");
     }
 
     return found;
