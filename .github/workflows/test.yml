@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PG_CONNECTION_STRING: ${{ secrets.PG_CONNECTION_STRING }}
+      PG_CONNECTION_STRING_TEST: ${{ secrets.PG_CONNECTION_STRING_TEST }}
     services:
       postgres:
         image: postgres
