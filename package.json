@@ -8,7 +8,8 @@
     "test": "jest --selectProjects test",
     "test:integration": "export JEST_WORKERS=3 ; ts-node test/setupIntegrationDb.ts ; jest --maxWorkers=$JEST_WORKERS --selectProjects integration ; ts-node test/teardownIntegrationDb.ts",
     "test:all": "export JEST_WORKERS=3 ; ts-node test/setupIntegrationDb.ts ; jest --maxWorkers=$JEST_WORKERS ; ts-node test/teardownIntegrationDb.ts",
-    "migrate": "knex migrate:latest"
+    "migrate": "knex migrate:latest",
+    "schema:generate": "sql-ts -c .sql-ts.json"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@rmp135/sql-ts": "^1.8.2",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.34",
     "@types/node-schedule": "^1.3.1",
