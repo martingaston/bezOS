@@ -11,6 +11,18 @@ import {
 
 export class PgQuestionsRepository implements QuestionsRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
+
+  async activateRoundQuestion(
+    roundQuestion: InsertedRoundQuestion,
+    startDate: Date,
+    endDate: Date
+  ): Promise<InsertedRoundQuestion> {
+    return await this.db.one(
+      "UPDATE bezos.rounds_questions SET active = TRUE, start_date = $2, end_date = $3 WHERE id = $1 RETURNING *",
+      [roundQuestion.id, startDate, endDate]
+    );
+  }
+
   async getActiveRound(): Promise<Round> {
     return await this.db.one(
       "SELECT * FROM bezos.rounds WHERE id = (SELECT active_round FROM bezos.active_round LIMIT 1)"

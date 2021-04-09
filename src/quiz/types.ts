@@ -1,6 +1,6 @@
-import { InsertedQuestion } from "../db/types";
+import { InsertedQuestion, InsertedRoundQuestion } from "../db/types";
 
 export type PosedQuestion = {
-  id: string;
+  roundQuestion: InsertedRoundQuestion;
   question: InsertedQuestion;
 };

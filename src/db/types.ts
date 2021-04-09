@@ -38,6 +38,10 @@ export interface QuestionsRepository {
   getActiveRound(): Promise<Round>;
   setActiveRound(round: Round): Promise<void>;
   getInactiveRoundQuestion(round: Round): Promise<InsertedRoundQuestion>;
+  activateRoundQuestion(
+    startDate: Date,
+    endDate: Date
+  ): Promise<InsertedRoundQuestion>;
   scheduleRoundQuestion(
     roundQuestion: RoundQuestion
   ): Promise<InsertedRoundQuestion>;

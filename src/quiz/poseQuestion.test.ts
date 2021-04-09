@@ -44,15 +44,25 @@ describe("poseQuestion", () => {
 
   test("it will schedule a question when one is in the database", async () => {
     const { id } = await addInactiveRoundQuestion(db);
-    expect(poseQuestion(db)).resolves.toMatchObject({ kind: "success", id });
+    const startDate = new Date();
+    const endDate = new Date();
+
+    return expect(poseQuestion(db, startDate, endDate)).resolves.toMatchObject({
+      roundQuestion: { id },
+      kind: "success",
+    });
   });
 
   test("it will reject when the active round has no questions", async () => {
     await addInactiveRoundQuestion(db);
     const newRound = await db.questions.addRound("test", "testing");
+    const startDate = new Date();
+    const endDate = new Date();
+
     await db.questions.setActiveRound(newRound);
-    expect(poseQuestion(db)).rejects.toMatch(
-      "There are no inactive round questions available" // TODO consistent errors across memory and pg dbs
+
+    return expect(poseQuestion(db, startDate, endDate)).rejects.toThrow(
+      "Error posing a new question: No inactive roundQuestion was found in the database" // TODO align memory and db error messages
     );
   });
 });

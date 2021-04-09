@@ -30,6 +30,30 @@ export class MemoryQuestionsRepositorySpy {
 }
 
 export class MemoryQuestionsRepository implements QuestionsRepository {
+  async activateRoundQuestion(
+    startDate: Date,
+    endDate: Date
+  ): Promise<InsertedRoundQuestion> {
+    const index = rounds_questions.findIndex(
+      (rq) => rq.roundId === activeRound && rq.active === false
+    );
+
+    if (index === -1) {
+      return Promise.reject(
+        "No inactive roundQuestion was found in the database"
+      );
+    }
+
+    rounds_questions[index] = {
+      ...rounds_questions[index],
+      startDate,
+      endDate,
+      active: true,
+    };
+
+    return rounds_questions[index];
+  }
+
   async getActiveRound(): Promise<Round> {
     const round = rounds.filter((round) => round.id === activeRound);
     if (round.length !== 1) {

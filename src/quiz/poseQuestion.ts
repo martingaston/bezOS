@@ -16,12 +16,28 @@ type QuizResultFailure = {
 };
 
 export const poseQuestion = async (
-  db: QuizRepository
+  db: QuizRepository,
+  startTime: Date,
+  endTime: Date
 ): Promise<PosedQuestion & QuizResult> => {
-  const round = await db.questions.getActiveRound();
-  const roundQuestion = await db.questions.getInactiveRoundQuestion(round);
-  const question = await db.questions.getQuestionById(roundQuestion.questionId);
-  const result: QuizResultSuccess = { kind: "success" };
+  try {
+    const activeRoundQuestion = await db.questions.activateRoundQuestion(
+      startTime,
+      endTime
+    );
 
-  return Promise.resolve({ id: roundQuestion.id, question, ...result });
+    const question = await db.questions.getQuestionById(
+      activeRoundQuestion.questionId
+    );
+
+    const result: QuizResultSuccess = { kind: "success" };
+
+    return Promise.resolve({
+      roundQuestion: activeRoundQuestion,
+      question,
+      ...result,
+    });
+  } catch (e) {
+    return Promise.reject(new Error(`Error posing a new question: ${e}`));
+  }
 };

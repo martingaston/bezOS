@@ -162,4 +162,38 @@ describe("PgQuestionsRepository", () => {
 
     expect(result.activeRound).toBe(round.id);
   });
+
+  test("can activate a round question", async () => {
+    const source = await db.questions.getOrCreateSourceFromName("TEST");
+    const question = await db.questions.addNewQuestion({
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [],
+      answer: {
+        value: ["A"],
+        text: "A test answer",
+      },
+      source: source.id,
+    });
+    const round = await db.questions.addRound("TEST", "Testing");
+
+    const roundQuestion = await db.questions.scheduleRoundQuestion({
+      questionId: question.id,
+      roundId: round.id,
+      startDate: new Date(),
+      endDate: new Date(),
+      active: false,
+    });
+
+    const startDate = new Date();
+    const endDate = new Date();
+
+    const scheduled = await db.questions.activateRoundQuestion(
+      roundQuestion,
+      startDate,
+      endDate
+    );
+
+    expect(scheduled.active).toBe(true);
+  });
 });
