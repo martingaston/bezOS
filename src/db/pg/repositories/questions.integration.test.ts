@@ -176,8 +176,9 @@ describe("PgQuestionsRepository", () => {
       source: source.id,
     });
     const round = await db.questions.addRound("TEST", "Testing");
+    await db.questions.setActiveRound(round);
 
-    const roundQuestion = await db.questions.scheduleRoundQuestion({
+    await db.questions.scheduleRoundQuestion({
       questionId: question.id,
       roundId: round.id,
       startDate: new Date(),
@@ -189,7 +190,6 @@ describe("PgQuestionsRepository", () => {
     const endDate = new Date();
 
     const scheduled = await db.questions.activateRoundQuestion(
-      roundQuestion,
       startDate,
       endDate
     );

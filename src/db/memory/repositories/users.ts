@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 const usersSlackNotifications: UserSlackNotification[] = [];
 
 export class MemoryUsersRepository implements UsersRepository {
+  getUserById(id: string): Promise<User> {
+    throw new Error("Method not implemented.");
+  }
   async getOrAddUserFromSlack(slackUserId: string): Promise<User> {
     const user = usersSlackNotifications.find(
       (user) => user.id === slackUserId

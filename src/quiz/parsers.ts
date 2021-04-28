@@ -1,24 +1,17 @@
-import { PostAnswerSuccess } from "../db/memory/oldMemoryDb";
-import { Result } from "../types";
 import { randomCelebrationEmoji } from "../util/randomCelebrationEmoji";
+import { Answer } from "./answerQuestion";
 
-export const parseResponseMessage = (
-  result: Result<PostAnswerSuccess>
-): string => {
-  if (result.kind === "failure") {
-    return "There was a problem submitting your answer.";
-  }
-
-  switch (result.action) {
+export const parseResponseMessage = (answer: Answer): string => {
+  switch (answer.action) {
     case "CREATED":
       return `You answered option ${
-        result.answer
+        answer.answer
       } to the question ${randomCelebrationEmoji()}`;
     case "UPDATED":
       return `You updated your answer to the question with option ${
-        result.answer
+        answer.answer
       } ${randomCelebrationEmoji()}`;
     case "NOOP":
-      return `Your current answer to the question is already option ${result.answer} 😎`;
+      return `Your current answer to the question is already option ${answer.answer} 😎`;
   }
 };

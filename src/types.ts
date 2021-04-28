@@ -16,11 +16,10 @@ type ResultFailure<E> = {
   kind: "failure";
 } & E;
 
-export type Answer = {
-  scheduledId: string;
+export type UserSubmittedAnswer = {
   questionId: string;
   userId: string;
-  answer: string;
+  answer: string[];
 };
 
 // unfortunate workaround - see https://slack.dev/node-slack-sdk/typescript

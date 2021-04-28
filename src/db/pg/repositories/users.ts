@@ -1,7 +1,11 @@
 import { IDatabase, IMain } from "pg-promise";
+import { db } from "..";
 import { User, UserSlackNotification, UsersRepository } from "../../types";
 export class PgUsersRepository implements UsersRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
+  getUserById(id: string): Promise<User> {
+    return db.one("SELECT * FROM bezos.users WHERE id = $1", [id]);
+  }
 
   async getOrAddUserFromSlack(slackUserId: string): Promise<User> {
     const slackUserIdExistsInDb = await this.db.oneOrNone<User>(

@@ -6,6 +6,8 @@ import {
   QuestionsRepository,
   Round,
   RoundQuestion,
+  RoundQuestionNotification,
+  RoundQuestionSlackNotification,
   Source,
 } from "../../types";
 
@@ -30,6 +32,49 @@ export class MemoryQuestionsRepositorySpy {
 }
 
 export class MemoryQuestionsRepository implements QuestionsRepository {
+  setRoundQuestionNotificationToNotifiedById(
+    id: number
+  ): Promise<RoundQuestionNotification> {
+    throw new Error("Method not implemented.");
+  }
+  getUnnotifiedRoundsQuestionsNotifications(): Promise<
+    RoundQuestionNotification[]
+  > {
+    throw new Error("Method not implemented.");
+  }
+  getRoundQuestionById(
+    roundQuestionId: string
+  ): Promise<InsertedRoundQuestion> {
+    throw new Error("Method not implemented.");
+  }
+  addRoundQuestionNotificationByRoundQuestionId(
+    roundQuestionId: string
+  ): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  getRoundQuestionSlackNotificationByRoundQuestionId(
+    roundQuestionId: string
+  ): Promise<RoundQuestionSlackNotification> {
+    throw new Error("Method not implemented.");
+  }
+  deactivateRoundQuestionsOlderThanDate(
+    date: Date
+  ): Promise<InsertedRoundQuestion[]> {
+    throw new Error("Method not implemented.");
+  }
+  getRound(id: number): Promise<Round> {
+    throw new Error("Method not implemented.");
+  }
+  getSource(uuid: string): Promise<Source> {
+    throw new Error("Method not implemented.");
+  }
+  addRoundQuestionSlackNotification(
+    roundQuestionId: string,
+    channel: string,
+    slackTs: string
+  ): Promise<RoundQuestionSlackNotification> {
+    throw new Error("Method not implemented.");
+  }
   async activateRoundQuestion(
     startDate: Date,
     endDate: Date

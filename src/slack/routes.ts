@@ -1,58 +1,79 @@
 import { App, Context, SlackAction } from "@slack/bolt";
-import { QuizDatabase } from "../db/memory/oldMemoryDb";
-import { answerQuestion } from "../quiz";
+import { answerQuestion } from "../quiz/answerQuestion";
 import { parseResponseMessage } from "../quiz/parsers";
-import { Result, Answer, SlackChatPostMessageResult } from "../types";
+import { Result, UserSubmittedAnswer } from "../types";
 import { activeQuestionBlock } from "./blocks/questionBlock";
-import { v4 as uuidv4 } from "uuid";
+import { poseQuestion } from "../quiz/poseQuestion";
+import { Question } from "../quiz/types";
+import { Block, KnownBlock, WebAPICallResult, WebClient } from "@slack/web-api";
+import { linkQuestionToSlackPost } from "../quiz/linkQuestionToSlackPost";
 
-export const getRoutes = (app: App, db: QuizDatabase): void => {
-  app.message("hello", async ({ say }) => {
-    const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + 60 * 1000);
-    const questionId = "ab75bf4f-61a5-43c9-b1fd-486901654b2e";
-    const scheduledId = uuidv4();
+interface ChatPostMessageResult extends WebAPICallResult {
+  channel: string;
+  ts: string;
+}
 
-    const question = await db.getQuestion(questionId);
-    let block;
-    if (question.kind === "success") {
-      block = activeQuestionBlock(
-        question.question,
-        scheduledId,
-        Math.floor(endTime.getTime() / 1000)
-      );
-    }
+const generateStartAndEndTimes = () => {
+  return {
+    startTime: new Date(),
+    endTime: new Date(new Date().getTime() + 60 * 1000),
+  };
+};
 
-    const { ts: slackTs } = (await say({
-      blocks: block,
-      text: "A new question from bezOS!",
-    })) as SlackChatPostMessageResult;
+const postQuestionToChannel = async (
+  client: WebClient,
+  question: Question,
+  channel: string
+) => {
+  const block = activeQuestionBlock(question);
+  const { ts } = await postBlockToSlackChannel(client, block, channel);
 
-    db.scheduleQuestion(scheduledId, questionId, slackTs, startTime, endTime);
+  return ts;
+};
+
+const postBlockToSlackChannel = async (
+  client: WebClient,
+  block: (Block | KnownBlock)[],
+  channel: string
+) => {
+  return (await client.chat.postMessage({
+    channel: channel,
+    text: "a new message from bezOS!",
+    blocks: block,
+  })) as ChatPostMessageResult;
+};
+
+export const getRoutes = (app: App): void => {
+  app.message("generate", async ({ client }) => {
+    const { startTime, endTime } = generateStartAndEndTimes();
+
+    const question = await poseQuestion(startTime, endTime);
+
+    const channel = "C01PDG2U3FY";
+    const slackTs = await postQuestionToChannel(client, question, channel);
+
+    await linkQuestionToSlackPost(question, channel, slackTs);
   });
 
+  // TODO: io-ts
   const processAnswerUserInput = (
     body: SlackAction,
     context: Context
-  ): Result<Answer, { message: string }> => {
+  ): Result<UserSubmittedAnswer, { message: string }> => {
     const questionId = context.actionIdMatches[1];
-    const scheduledId = context.actionIdMatches[2];
     const userId = body.user.id;
-    const answer = context.actionIdMatches[3];
+    const answer = context.actionIdMatches[2];
 
-    if (
-      typeof scheduledId !== "string" ||
-      typeof questionId !== "string" ||
-      typeof answer !== "string"
-    ) {
+    if (typeof questionId !== "string" || typeof answer !== "string") {
       return { kind: "failure", message: "invalid user input provided" };
     }
 
-    return { kind: "success", scheduledId, questionId, userId, answer };
+    return { kind: "success", questionId, userId, answer: [answer] };
   };
 
+  // TODO this regex should be extracted and stored with the generating function - with tests :)
   app.action(
-    /^Question\((.*)\).Scheduled\((.*)\).Answer\((.*)\)$/,
+    /^Question\((.*)\).Answer\((.*)\)$/,
     async ({ ack, body, context, client }) => {
       await ack();
 
@@ -61,12 +82,12 @@ export const getRoutes = (app: App, db: QuizDatabase): void => {
         return;
       }
 
-      const result = await answerQuestion(db, answer);
+      const result = await answerQuestion(answer);
 
       await client.chat.postEphemeral({
         channel: body.channel?.id ?? "",
         text: parseResponseMessage(result),
-        user: answer.userId,
+        user: result.user.slackId,
       });
     }
   );
