@@ -53,7 +53,7 @@ describe("PgAnswersRepository", () => {
     });
     const user = await db.users.getOrAddUserFromSlack(slackUserId);
 
-    await db.answers.addAnswerToRoundQuestion({
+    await db.answers.addAnswer({
       roundQuestionId: roundQuestion.id,
       userId: user.userId,
       answer: ["A"],

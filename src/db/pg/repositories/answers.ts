@@ -23,7 +23,7 @@ export class PgAnswersRepository implements AnswersRepository {
 
   async updateAnswer(answer: Answer): Promise<InsertedAnswer> {
     return await db.one(
-      "UPDATE bezos.answers SET answer = ${answer:json} WHERE user_id = ${userId} AND round_question_id = $${roundQuestionId} RETURNING *",
+      "UPDATE bezos.answers SET answer = ${answer:json} WHERE user_id = ${userId} AND round_question_id = ${roundQuestionId} RETURNING *",
       answer
     );
   }

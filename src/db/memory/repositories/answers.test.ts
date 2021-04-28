@@ -15,7 +15,7 @@ describe("MemoryUsersRepository", () => {
       answer: ["A"],
     };
 
-    const result = await db.addAnswerToRoundQuestion(answer);
+    const result = await db.addAnswer(answer);
     expect(result.id).toBe(1);
   });
 });
