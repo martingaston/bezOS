@@ -70,12 +70,12 @@ const baseQuestionBlock = (
         {
           type: "mrkdwn",
           text: isActive
-            ? `⏱️ This question is open until <!date^${question.endDate.toISOString()}^{date_pretty} at {time}|${
-                question.endDate
-              }>`
-            : `⛔ This question closed <!date^${question.endDate.toISOString()}^{date} at {time}|${
-                question.endDate
-              }>`,
+            ? `⏱️ This question is open until <!date^${Math.floor(
+                question.endDate.getTime() / 1000
+              )}^{date_pretty} at {time}|${question.endDate}>`
+            : `⛔ This question closed <!date^${Math.floor(
+                question.endDate.getTime() / 1000
+              )}^{date} at {time}|${question.endDate}>`,
         },
       ],
     },

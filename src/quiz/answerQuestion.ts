@@ -31,13 +31,12 @@ export async function answerQuestion(
       user.userId
     );
 
-    if (answerInDb === null) {
-      return Promise.reject("No answer found in the database");
-    }
-
     let submittedAnswer;
     let action: Action;
-    if (answerInDb.answer == answer.answer) {
+    if (
+      answerInDb !== null &&
+      compareAnswers(answerInDb.answer, answer.answer)
+    ) {
       action = "NOOP";
       submittedAnswer = answerInDb;
     } else if (answerInDb) {
@@ -62,3 +61,10 @@ export async function answerQuestion(
     return Promise.reject(`There was a problem answering the question: ${e}`);
   }
 }
+
+const compareAnswers = (a: string[], b: string[]): boolean => {
+  return (
+    a.map((value, index) => value === b[index]).filter((x) => x === false)
+      .length === 0
+  );
+};

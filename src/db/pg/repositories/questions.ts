@@ -69,7 +69,7 @@ export class PgQuestionsRepository implements QuestionsRepository {
     slackTs: string
   ): Promise<RoundQuestionSlackNotification> {
     return await this.db.one(
-      "INSERT INTO bezos.round_questions_slack_notifications (round_questions_id, slack_channel, slack_ts) VALUES ($1, $2, $3) RETURNING *",
+      "INSERT INTO bezos.rounds_questions_slack_notifications (rounds_questions_id, slack_channel, slack_ts) VALUES ($1, $2, $3) RETURNING *",
       [roundQuestionId, channel, slackTs]
     );
   }
