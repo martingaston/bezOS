@@ -1,27 +1,19 @@
 import { Block, KnownBlock } from "@slack/bolt";
-import { Question } from "../../db/memory/oldMemoryDb";
+import { Question } from "../../quiz/types";
 
 export const activeQuestionBlock = (
-  question: Question,
-  scheduled: string,
-  endTime: number
-): (Block | KnownBlock)[] =>
-  baseQuestionBlock(true, question, scheduled, endTime);
+  question: Question
+): (Block | KnownBlock)[] => baseQuestionBlock(true, question);
 
 export const expiredQuestionBlock = (
-  question: Question,
-  scheduled: string,
-  endTime: number
-): (Block | KnownBlock)[] =>
-  baseQuestionBlock(false, question, scheduled, endTime);
+  question: Question
+): (Block | KnownBlock)[] => baseQuestionBlock(false, question);
 
 const baseQuestionBlock = (
   isActive: boolean,
-  question: Question,
-  scheduled: string,
-  endTime: number
+  question: Question
 ): (Block | KnownBlock)[] => {
-  const parsedOptions = question.options.reduce<(Block | KnownBlock)[]>(
+  const parsedOptions = question.details.options.reduce<(Block | KnownBlock)[]>(
     (parsed, option) => {
       if (isActive) {
         return parsed.concat([
@@ -38,7 +30,8 @@ const baseQuestionBlock = (
                 emoji: true,
                 text: option.name,
               },
-              action_id: `Question(${question.id}).Scheduled(${scheduled}).Answer(${option.name})`,
+              // TODO: generating action_id should be own function
+              action_id: `Question(${question.id}).Answer(${option.name})`,
             },
           },
         ]);
@@ -61,7 +54,7 @@ const baseQuestionBlock = (
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `🤔 ${question.text}`,
+        text: `🤔 ${question.details.text}`,
       },
     },
     {
@@ -77,12 +70,12 @@ const baseQuestionBlock = (
         {
           type: "mrkdwn",
           text: isActive
-            ? `⏱️ This question is open until <!date^${endTime}^{date_pretty} at {time}|${new Date(
-                endTime
-              ).toISOString()}>`
-            : `⛔ This question closed <!date^${endTime}^{date} at {time}|${new Date(
-                endTime
-              ).toISOString()}>`,
+            ? `⏱️ This question is open until <!date^${Math.floor(
+                question.endDate.getTime() / 1000
+              )}^{date_pretty} at {time}|${question.endDate}>`
+            : `⛔ This question closed <!date^${Math.floor(
+                question.endDate.getTime() / 1000
+              )}^{date} at {time}|${question.endDate}>`,
         },
       ],
     },

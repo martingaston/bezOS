@@ -119,4 +119,81 @@ describe("PgQuestionsRepository", () => {
 
     expect(result).toBe(1);
   });
+
+  test("will retreieve an inactive round question", async () => {
+    const source = await db.questions.getOrCreateSourceFromName("TEST");
+    const question = await db.questions.addNewQuestion({
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [],
+      answer: {
+        value: ["A"],
+        text: "A test answer",
+      },
+      source: source.id,
+    });
+    const round = await db.questions.addRound("TEST", "Testing");
+
+    await db.questions.scheduleRoundQuestion({
+      questionId: question.id,
+      roundId: round.id,
+      startDate: new Date(),
+      endDate: new Date(),
+      active: false,
+    });
+
+    const scheduled = await db.questions.getInactiveRoundQuestion(round);
+
+    expect(scheduled.active).toBe(false);
+    expect(scheduled.questionId).toBe(question.id);
+  });
+
+  test("will set the active round", async () => {
+    const round = await db.questions.addRound(
+      "Test Round",
+      "This is a testing round"
+    );
+
+    await db.questions.setActiveRound(round);
+
+    const result = await db.one<{ activeRound: number }>(
+      "SELECT * FROM bezos.active_round"
+    );
+
+    expect(result.activeRound).toBe(round.id);
+  });
+
+  test("can activate a round question", async () => {
+    const source = await db.questions.getOrCreateSourceFromName("TEST");
+    const question = await db.questions.addNewQuestion({
+      text: "Test Question",
+      type: "MULTIPLE_CHOICE",
+      options: [],
+      answer: {
+        value: ["A"],
+        text: "A test answer",
+      },
+      source: source.id,
+    });
+    const round = await db.questions.addRound("TEST", "Testing");
+    await db.questions.setActiveRound(round);
+
+    await db.questions.scheduleRoundQuestion({
+      questionId: question.id,
+      roundId: round.id,
+      startDate: new Date(),
+      endDate: new Date(),
+      active: false,
+    });
+
+    const startDate = new Date();
+    const endDate = new Date();
+
+    const scheduled = await db.questions.activateRoundQuestion(
+      startDate,
+      endDate
+    );
+
+    expect(scheduled.active).toBe(true);
+  });
 });

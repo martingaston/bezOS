@@ -5,12 +5,13 @@ export interface QuizRepository {
 }
 
 export interface UsersRepository {
-  getOrAddUserFromSlack(slackUserId: string): Promise<User>;
+  getOrAddUserFromSlack(slackUserId: string): Promise<UserSlackNotification>;
+  getUserById(id: string): Promise<UserSlackNotification>;
 }
 
 export type User = {
-  slackId: string;
-  userId: string;
+  id: string;
+  createdAt: Date;
 };
 
 export type UserSlackNotification = {
@@ -19,7 +20,15 @@ export type UserSlackNotification = {
 };
 
 export interface AnswersRepository {
-  addAnswerToRoundQuestion(answer: Answer): Promise<InsertedAnswer>;
+  addAnswer(answer: Answer): Promise<InsertedAnswer>;
+  findAnswerByRoundQuestionIdAndUserIdOrNull(
+    roundQuestionId: string,
+    userId: string
+  ): Promise<InsertedAnswer | null>;
+  findAnswersByRoundQuestionId(
+    roundQuestionId: string
+  ): Promise<InsertedAnswer[]>;
+  updateAnswer(answer: Answer): Promise<InsertedAnswer>;
 }
 
 export type Answer = {
@@ -34,7 +43,37 @@ export interface QuestionsRepository {
   addNewQuestion(question: Question): Promise<InsertedQuestion>;
   getQuestionById(id: number): Promise<InsertedQuestion>;
   getOrCreateSourceFromName(name: string): Promise<Source>;
+  getRound(id: number): Promise<Round>;
+  getSource(uuid: string): Promise<Source>;
   addRound(name: string, description: string): Promise<Round>;
+  getRoundQuestionSlackNotificationByRoundQuestionId(
+    roundQuestionId: string
+  ): Promise<RoundQuestionSlackNotification>;
+  addRoundQuestionNotificationByRoundQuestionId(
+    roundQuestionId: string
+  ): Promise<void>;
+  getUnnotifiedRoundsQuestionsNotifications(): Promise<
+    RoundQuestionNotification[]
+  >;
+  setRoundQuestionNotificationToNotifiedById(
+    id: number
+  ): Promise<RoundQuestionNotification>;
+  addRoundQuestionSlackNotification(
+    roundQuestionId: string,
+    channel: string,
+    slackTs: string
+  ): Promise<RoundQuestionSlackNotification>;
+  getActiveRound(): Promise<Round>;
+  setActiveRound(round: Round): Promise<void>;
+  getRoundQuestionById(roundQuestionId: string): Promise<InsertedRoundQuestion>;
+  getInactiveRoundQuestion(round: Round): Promise<InsertedRoundQuestion>;
+  activateRoundQuestion(
+    startDate: Date,
+    endDate: Date
+  ): Promise<InsertedRoundQuestion>;
+  deactivateRoundQuestionsOlderThanDate(
+    date: Date
+  ): Promise<InsertedRoundQuestion[]>;
   scheduleRoundQuestion(
     roundQuestion: RoundQuestion
   ): Promise<InsertedRoundQuestion>;
@@ -87,6 +126,19 @@ export type RoundQuestion = {
   startDate: Date;
   endDate: Date;
   active: boolean;
+};
+
+export type RoundQuestionNotification = {
+  id: number;
+  roundsQuestionsId: string;
+  notified: boolean;
+};
+
+export type RoundQuestionSlackNotification = {
+  id: number;
+  roundsQuestionsId: string;
+  slackChannel: string;
+  slackTs: string;
 };
 
 export type InsertedRoundQuestion = RoundQuestion & uuidId;
