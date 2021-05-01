@@ -54,7 +54,7 @@ export async function answerQuestion(
       answer: submittedAnswer.answer,
       user: {
         userId: user.userId,
-        slackId: user.slackId,
+        slackId: user.id,
       },
     };
   } catch (e) {

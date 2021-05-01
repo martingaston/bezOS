@@ -5,13 +5,13 @@ export interface QuizRepository {
 }
 
 export interface UsersRepository {
-  getOrAddUserFromSlack(slackUserId: string): Promise<User>;
-  getUserById(id: string): Promise<User>;
+  getOrAddUserFromSlack(slackUserId: string): Promise<UserSlackNotification>;
+  getUserById(id: string): Promise<UserSlackNotification>;
 }
 
 export type User = {
-  slackId: string;
-  userId: string;
+  id: string;
+  createdAt: Date;
 };
 
 export type UserSlackNotification = {

@@ -3,12 +3,17 @@ import { db } from "..";
 import { User, UserSlackNotification, UsersRepository } from "../../types";
 export class PgUsersRepository implements UsersRepository {
   constructor(private db: IDatabase<unknown>, private pgp: IMain) {}
-  getUserById(id: string): Promise<User> {
-    return db.one("SELECT * FROM bezos.users WHERE id = $1", [id]);
+  getUserById(id: string): Promise<UserSlackNotification> {
+    return db.one(
+      "SELECT * FROM bezos.users_slack_notifications WHERE user_id = $1",
+      [id]
+    );
   }
 
-  async getOrAddUserFromSlack(slackUserId: string): Promise<User> {
-    const slackUserIdExistsInDb = await this.db.oneOrNone<User>(
+  async getOrAddUserFromSlack(
+    slackUserId: string
+  ): Promise<UserSlackNotification> {
+    const slackUserIdExistsInDb = await this.db.oneOrNone<UserSlackNotification>(
       "SELECT * FROM bezos.users_slack_notifications WHERE id = $1",
       [slackUserId]
     );
@@ -17,7 +22,7 @@ export class PgUsersRepository implements UsersRepository {
       return slackUserIdExistsInDb;
     }
 
-    const newUser = await this.db.one<UserSlackNotification>(
+    const newUser = await this.db.one<User>(
       "INSERT INTO bezos.users VALUES (DEFAULT, DEFAULT) RETURNING *"
     );
 

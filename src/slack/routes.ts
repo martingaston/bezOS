@@ -87,7 +87,7 @@ export const getRoutes = (app: App): void => {
       await client.chat.postEphemeral({
         channel: body.channel?.id ?? "",
         text: parseResponseMessage(result),
-        user: "U01PL9GTD26",
+        user: result.user.slackId,
       });
     }
   );

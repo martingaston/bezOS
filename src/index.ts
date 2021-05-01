@@ -12,17 +12,17 @@ getRoutes(app);
   // Start your app
   await app.start(parseInt(getEnv("PORT")));
 
-  // schedule.scheduleJob("* * * * *", async (time: Date) => {
-  //   console.log(`Checking active questions at ${time.toISOString()}...`);
-  //   await stopScheduledQuestionsJob(time);
-  // });
+  schedule.scheduleJob("* * * * *", async (time: Date) => {
+    console.log(`Checking active questions at ${time.toISOString()}...`);
+    await stopScheduledQuestionsJob(time);
+  });
 
-  // schedule.scheduleJob("* * * * *", async (time: Date) => {
-  //   console.log(
-  //     `Checking whether users need notifying at ${time.toISOString()}...`
-  //   );
-  //   await notifyQuestionRespondentsJob();
-  // });
+  schedule.scheduleJob("* * * * *", async (time: Date) => {
+    console.log(
+      `Checking whether users need notifying at ${time.toISOString()}...`
+    );
+    await notifyQuestionRespondentsJob();
+  });
 
   console.log(`⚡️ Bolt app is running on port ${parseInt(getEnv("PORT"))}!`);
 })();

@@ -34,7 +34,7 @@ export const getRespondentsToQuestionsThatNeedNotifying = async (): Promise<
           correct: compareAnswers(question.answer.value, answer.answer),
           respondent: {
             userId: user.userId,
-            slackId: user.slackId,
+            slackId: user.id,
           },
         };
       })
